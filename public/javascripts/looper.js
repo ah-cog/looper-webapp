@@ -2,6 +2,10 @@ disableEventCreate = false;
 showPalette = false;
 
 // TODO: Define a domain-specific language for the microcontroller.
+
+/**
+ * Saves the script currently in the Firepad editor for the current node.
+ */
 function saveScript() {
     var script = "" + firepadDevice.firepad.getText();
     firepadEvent.behavior = eval('(' + script + ')');
@@ -46,7 +50,7 @@ function Looper(options) {
         //     $('#overlay').hide();
         // </script>
 
-        
+
         $('#panes').append('<li class="pane' + deviceCount + '">' + overlay + '<canvas id="canvas' + deviceCount + '" style="width: 100%; height: 100%;"></canvas></li>');
         canvas = "canvas" + deviceCount;
 
@@ -412,7 +416,7 @@ function setupGestures(device) {
 
         //
         // Get the touched event node, if one exists
-        // 
+        //
         var eventCount = device.processingInstance.eventLoop.events.length;
 
         for (var i = 0; i < eventCount; i++) {
@@ -435,39 +439,6 @@ function setupGestures(device) {
                 //device.firepad.setText("" + loopEvent.behavior);
                 device.firepad.setText(beautifulScript);
                 // device.firepad.setText(jsString);
-
-
-
-                // firepadDevice = device;
-                // firepadEvent = loopEvent;
-                // if (device.firepad === undefined) {
-                //     device.firepad = setupFirepad("firepad-container-" + device.index, device.index, loopEvent.label); // Set up Firebase storage for behavior with specified name on specified device
-                // }
-                // $('#overlay' + device.index).show();
-                // // var jsString = "" + loopEvent.behavior;
-                // // var jsb = beautify(jsString, {
-                // //     'indent_size': 1,
-                // //     'indent_char': '\t'
-                // // });
-                // var beautifulScript = js_beautify("" + loopEvent.behavior, {
-                //     'indent_size': 1,
-                //     'indent_char': '\t'
-                // });
-                // // device.firepad.setText('');
-                // device.firepad.setText('');
-                // device.firepad.setText(beautifulScript);
-
-
-
-
-                // loopEvent.state = 'MOVING';
-                // disableEventCreate = true;
-
-                // var index = Math.random() * 2;
-                // loopEvent.go = device.looper.commands[parseInt(index)];
-
-                // console.log("\tevent " + i);
-                // break;
             }
         }
     });
@@ -514,7 +485,7 @@ function setupGestures(device) {
                     // Update for selected behavior
                     loopEvent.label = behavior.label;
                     loopEvent.behavior = behavior.script;
-                    // loopEvent.behavior = function() { 
+                    // loopEvent.behavior = function() {
                     //     // var command = loopEvent.go;
                     //     var index = Math.random() * 2;
                     //     // command = this.looper.commands[parseInt(index)];
@@ -534,11 +505,11 @@ function setupGestures(device) {
 
 
 
-                
+
 
         //
         // Get the touched event node, if one exists
-        // 
+        //
         var eventCount = device.processingInstance.eventLoop.events.length;
 
         for (var i = 0; i < eventCount; i++) {
@@ -561,7 +532,7 @@ function setupGestures(device) {
         //
         // Check of "go" button touched
         //
-        
+
         if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
             && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight / 2) && (device.processingInstance.screenHeight / 2) < ev.gesture.center.pageY + 50)) {
 
@@ -573,7 +544,7 @@ function setupGestures(device) {
         //
         // Check if "script" button touched
         //
-        
+
         if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
             && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight / 2 - 90) && (device.processingInstance.screenHeight / 2 - 90) < ev.gesture.center.pageY + 50)) {
             //&& (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight / 7 + 20) && (device.processingInstance.screenHeight / 7 + 20) < ev.gesture.center.pageY + 50)) {
@@ -647,7 +618,7 @@ function setupGestures(device) {
 
         //
         // Get the touched event node, if one exists
-        // 
+        //
         // var eventCount = device.processingInstance.eventLoop.events.length;
 
         // for (var i = 0; i < eventCount; i++) {
@@ -778,12 +749,12 @@ function Device(options) {
             visible: false
         });
 
-        // 
+        //
 
         // Add "default" behaviors to palette
         // processing.behaviorPalette.addBehavior(0, 0, 'get');
         // processing.behaviorPalette.addBehavior(100, 0, 'on');
-        // processing.behaviorPalette.addBehavior(-100, 0, 'off');  
+        // processing.behaviorPalette.addBehavior(-100, 0, 'off');
         processing.behaviorPalette.addBehavior(0, 0, 'get', function() {
             //console.log("DOING " + this.label);
             console.log('I just set up a <div> to render a chart from JavaScript.')
@@ -864,7 +835,7 @@ function Device(options) {
                 if (processing.behaviorPalette.visible) {
 
                     drawBehaviors();
-                    
+
                 }
 
                 function drawBehaviors() {
@@ -931,7 +902,7 @@ function Device(options) {
                 if (loopEvent.x !== loopEvent.xTarget || loopEvent.y !== loopEvent.yTarget) { // FREE
                     //console.log("Rendering ghost");
                 }
-                
+
                 // Check if event node is near to the event loop
                 // if (distance < 110) { // ENTANGLED
                 //     loopEvent.state = 'ENTANGLED';
@@ -997,8 +968,8 @@ function Device(options) {
                     var loopEvent = processing.eventLoop.events[i];
                     if (loopEvent.state === 'SEQUENCED') {
                         // loopEvent.go = function() { console.log("action " + i); }
-                        // loopEvent.behavior = function() { 
-                        // loopEvent.go = function() { 
+                        // loopEvent.behavior = function() {
+                        // loopEvent.go = function() {
                         //     // var command = loopEvent.go;
                         //     var index = Math.random() * 2;
                         //     // command = this.looper.commands[parseInt(index)];

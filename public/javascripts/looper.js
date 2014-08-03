@@ -3,12 +3,63 @@ showPalette = false;
 
 // Pixel addresses
 deviceAddresses = [];
-deviceAddresses[0] = "192.168.69.137"; // deviceAddresses[0] = "10.10.0.146";
+deviceAddresses[0] = "192.168.43.190"; // "192.168.69.146"; // deviceAddresses[0] = "10.10.0.146";
 deviceAddresses[1] = "192.168.69.118";
 deviceAddresses[2] = "10.10.0.112";
 // - 10.10.0.118 (Blue, 1)
 // - 10.10.0.137 (Yellow, 2)
 // - 10.10.0.112 (Red, 3)
+
+//
+// looper-library.js
+//
+// Description: Interface for interacting with an embedded device's server.
+//
+// TODO: Move to another file that only includes the library to a client's server.
+//
+
+// Library:
+//
+// Utilities: 
+// - post (Utility for HTTP POSTs)
+// - get (Utility for HTTP GETs)
+//
+// Interface:
+//   /pin
+//   /delay
+//   /erase
+//
+//   /analog-pin
+//   /digital-pin
+//   /pwm (needed in addition to analog?)
+//   /behavior (POST to upload, GET to download)
+//   /memorize or /remember (store in memory for later recall)
+//   /report or /recall (store in recall from memory)
+//   /module/color (of module)
+//   /module/orientation
+//   /debug/firmware
+//   /debug/log
+//
+// - setColor/getColor (of module)
+// - getNeighbors
+// - getBehavior
+//
+// Candidates for Interface:
+//
+//   /in or /input
+//   /out or /output
+//   /store or /push
+//   /load or /pop
+//   /call or /remember
+//   /upload (submit JSON code) [Alternatives: behavior, firmware, sketch, code]
+//   /download
+//   /sync
+//   /action (behavior consists of one or more actions)
+
+// function Device() {
+//     // TODO: Implement device... add post, get, pin, pwm, etc. so they can be called for this device!
+// }
+
 
 /**
  * Send a POST request to the specified address.
@@ -54,19 +105,34 @@ function get(address, params, callback) {
     http.send(params);
 }
 
-function pin(pin, operation, type, mode, value) {
+// TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
+//function pin(index, pin, operation, type, mode, value) {
+function pin(options) {
+    var defaults = {
+        index: -1,
+        pin: -1,
+        operation: 0,
+        type: 0,
+        mode: 0,
+        value: 0
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var url = deviceUri.concat("/pin");
-    var params = "pin=" + pin + "&operation=" + operation + "&type=" + type + "&mode=" + mode + "&value=" + value + "";
+    var params = "index=" + options['index'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
     url = url.concat('?', params);
     
     http.open("POST", url, true);
 
     // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
     
-    http.onreadystatechange = function() { //Call a function when the state changes.
+    http.onreadystatechange = function() { // Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
            console.log(http.responseText);
         }
@@ -74,31 +140,96 @@ function pin(pin, operation, type, mode, value) {
     http.send(params);
 }
 
-function readPin(pin, operation, type, mode, value) {
+function defaultCallback() {
+
+}
+
+function getPin(options, callback) {
+    var defaults = {
+        index: -1,
+        pin: -1,
+        operation: 1,
+        type: 0,
+        mode: 0,
+        value: 0
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var url = deviceUri.concat("/pin");
-    var params = "pin=" + pin + "&operation=" + operation + "&type=" + type + "&mode=" + mode + "&value=" + value + "";
+    var params = "index=" + options['index'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
     url = url.concat('?', params);
-
+    
     http.open("GET", url, true);
 
     // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-    http.onreadystatechange = function() { //Call a function when the state changes.
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
-            console.log(http.responseText);
+
+            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
+
+            if (callback !== undefined) {
+                callback(); // The callback function
+            }
         }
     }
     http.send(params);
 }
 
-function delay(milliseconds) {
+function getPins(options, callback) {
+    var defaults = {
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
+    var url = deviceUri.concat("/pins");
+    var params = "";
+    url = url.concat('?', params);
+    
+    http.open("GET", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+
+            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
+
+            console.log(http.responseText);
+            
+            if (callback !== undefined) {
+                callback(); // The callback function
+            }
+        }
+    }
+    http.send(params);
+}
+
+// getPin()
+
+function delay(options) {
+    var defaults = {
+        index: -1,
+        milliseconds: 1000
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var url = deviceUri.concat("/delay");
-    var params = "milliseconds=" + milliseconds + "";
+    var params = "index=" + options['index'] + "&milliseconds=" + options['milliseconds'] + "";
     url = url.concat('?', params);
 
     http.open("POST", url, true);
@@ -114,7 +245,13 @@ function delay(milliseconds) {
     http.send(params);
 }
 
-function erase() {
+function erase(options) {
+    var defaults = {
+        // TODO: List default parameter values here.
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var url = deviceUri.concat("/erase");
@@ -133,10 +270,6 @@ function erase() {
     http.send(params);
 }
 
-// store/push
-// load/pop
-// call/remember
-
 
 
 
@@ -145,174 +278,151 @@ function erase() {
 
 
 /**
-    * super simple carousel
-    * animation between panes happens with css transitions
-    */
-    function Carousel(element) {
-        var self = this;
-        element = $(element);
+* super simple carousel
+* animation between panes happens with css transitions
+*/
+function Carousel(element) {
+    var self = this;
+    element = $(element);
 
-        var container = $(">ul", element);
-        var panes = $(">ul>li", element);
+    var container = $(">ul", element);
+    var panes = $(">ul>li", element);
 
-        var pane_width = 0;
-        var pane_count = panes.length;
+    var pane_width = 0;
+    var pane_count = panes.length;
 
-        var current_pane = 0;
+    var current_pane = 0;
 
 
-        /**
-         * initial
-         */
-        this.init = function() {
+    /**
+     * initial
+     */
+    this.init = function() {
+        setPaneDimensions();
+
+        $(window).on("load resize orientationchange", function() {
             setPaneDimensions();
-
-            $(window).on("load resize orientationchange", function() {
-                setPaneDimensions();
-                //updateOffset();
-            })
-        };
+            //updateOffset();
+        })
+    };
 
 
-        /**
-         * set the pane dimensions and scale the container
-         */
-        function setPaneDimensions() {
-            pane_width = element.width();
-            panes.each(function() {
-                $(this).width(pane_width);
-            });
-            container.width(pane_width*pane_count);
-        };
+    /**
+     * set the pane dimensions and scale the container
+     */
+    function setPaneDimensions() {
+        pane_width = element.width();
+        panes.each(function() {
+            $(this).width(pane_width);
+        });
+        container.width(pane_width*pane_count);
+    };
 
 
-        /**
-         * show pane by index
-         * @param   {Number}    index
-         */
-        this.showPane = function( index ) {
-            // between the bounds
-            index = Math.max(0, Math.min(index, pane_count-1));
-            current_pane = index;
+    /**
+     * show pane by index
+     * @param   {Number}    index
+     */
+    this.showPane = function( index ) {
+        // between the bounds
+        index = Math.max(0, Math.min(index, pane_count-1));
+        current_pane = index;
 
-            var offset = -((100/pane_count)*current_pane);
-            setContainerOffset(offset, true);
-        };
-
-
-        /**
-         * show pane by index
-         * @param   {Number}    index
-         */
-        this.getCurrentPane = function() {
-            return current_pane;
-        };
+        var offset = -((100/pane_count)*current_pane);
+        setContainerOffset(offset, true);
+    };
 
 
-        function setContainerOffset(percent, animate) {
-            container.removeClass("animate");
+    /**
+     * show pane by index
+     * @param   {Number}    index
+     */
+    this.getCurrentPane = function() {
+        return current_pane;
+    };
 
-            if(animate) {
-                container.addClass("animate");
-            }
 
-            if(Modernizr.csstransforms3d) {
-                container.css("transform", "translate3d("+ percent +"%,0,0) scale3d(1,1,1)");
-            }
-            else if(Modernizr.csstransforms) {
-                container.css("transform", "translate("+ percent +"%,0)");
-            }
-            else {
-                var px = ((pane_width*pane_count) / 100) * percent;
-                container.css("left", px+"px");
-            }
+    function setContainerOffset(percent, animate) {
+        container.removeClass("animate");
+
+        if(animate) {
+            container.addClass("animate");
         }
 
-        this.next = function() { return this.showPane(current_pane+1, true); };
-        this.prev = function() { return this.showPane(current_pane-1, true); };
-
-
-
-        function handleHammer(ev) {
-            // console.log(ev);
-            // disable browser scrolling
-            ev.gesture.preventDefault();
-
-            if (!disableEventCreate) {
-
-                switch(ev.type) {
-                    case 'dragright':
-                    case 'dragleft':
-                        // stick to the finger
-                        var pane_offset = -(100/pane_count)*current_pane;
-                        var drag_offset = ((100/pane_width)*ev.gesture.deltaX) / pane_count;
-
-                        // slow down at the first and last pane
-                        if((current_pane == 0 && ev.gesture.direction == Hammer.DIRECTION_RIGHT) ||
-                            (current_pane == pane_count-1 && ev.gesture.direction == Hammer.DIRECTION_LEFT)) {
-                            drag_offset *= .4;
-                        }
-
-                        setContainerOffset(drag_offset + pane_offset);
-                        break;
-
-                    case 'swipeleft':
-                        self.next();
-                        ev.gesture.stopDetect();
-                        break;
-
-                    case 'swiperight':
-                        self.prev();
-                        ev.gesture.stopDetect();
-                        break;
-
-                    case 'release':
-                        // more then 50% moved, navigate
-                        if(Math.abs(ev.gesture.deltaX) > pane_width/2) {
-                            if(ev.gesture.direction == 'right') {
-                                self.prev();
-                            } else {
-                                self.next();
-                            }
-                        }
-                        else {
-                            self.showPane(current_pane, true);
-                        }
-                        break;
-                }
-
-            }
+        if(Modernizr.csstransforms3d) {
+            container.css("transform", "translate3d("+ percent +"%,0,0) scale3d(1,1,1)");
         }
-
-        element.hammer({ drag_lock_to_axis: true })
-            .on("release dragleft dragright swipeleft swiperight", handleHammer);
+        else if(Modernizr.csstransforms) {
+            container.css("transform", "translate("+ percent +"%,0)");
+        }
+        else {
+            var px = ((pane_width*pane_count) / 100) * percent;
+            container.css("left", px+"px");
+        }
     }
 
+    this.next = function() { return this.showPane(current_pane+1, true); };
+    this.prev = function() { return this.showPane(current_pane-1, true); };
 
-    var carousel = new Carousel("#carousel");
-    carousel.init();
 
-    // $(".drag")
-    //   .hammer({ drag_max_touches: 0 })
-    //   .on("touch drag dragright dragleft", function(ev) {
-    //     console.log("DRAG CIRCLE");
 
-    //     var touches = ev.gesture.touches;
+    function handleHammer(ev) {
+        // console.log(ev);
+        // disable browser scrolling
+        ev.gesture.preventDefault();
 
-    //     for(var t=0,len=touches.length; t<len; t++) {
-    //         var target = $(touches[t].target);
-    //         target.css({
-    //             zIndex: 1337,
-    //             left: touches[t].pageX-50,
-    //             top: touches[t].pageY-50
-    //         });
-    //     }
+        if (!disableEventCreate) {
 
-    //     ev.gesture.preventDefault();
-    //     ev.stopPropagation();
-    //     ev.gesture.stopPropagation();
-    //     return;
-    //   });
+            switch(ev.type) {
+                case 'dragright':
+                case 'dragleft':
+                    // stick to the finger
+                    var pane_offset = -(100/pane_count)*current_pane;
+                    var drag_offset = ((100/pane_width)*ev.gesture.deltaX) / pane_count;
+
+                    // slow down at the first and last pane
+                    if((current_pane == 0 && ev.gesture.direction == Hammer.DIRECTION_RIGHT) ||
+                        (current_pane == pane_count-1 && ev.gesture.direction == Hammer.DIRECTION_LEFT)) {
+                        drag_offset *= .4;
+                    }
+
+                    setContainerOffset(drag_offset + pane_offset);
+                    break;
+
+                case 'swipeleft':
+                    self.next();
+                    ev.gesture.stopDetect();
+                    break;
+
+                case 'swiperight':
+                    self.prev();
+                    ev.gesture.stopDetect();
+                    break;
+
+                case 'release':
+                    // more then 50% moved, navigate
+                    if(Math.abs(ev.gesture.deltaX) > pane_width/2) {
+                        if(ev.gesture.direction == 'right') {
+                            self.prev();
+                        } else {
+                            self.next();
+                        }
+                    }
+                    else {
+                        self.showPane(current_pane, true);
+                    }
+                    break;
+            }
+
+        }
+    }
+
+    // Set up touch event handlers (with Hammer.js)
+    element.hammer({ drag_lock_to_axis: true }).on("release dragleft dragright swipeleft swiperight", handleHammer);
+}
+
+var carousel = new Carousel("#carousel");
+carousel.init();
 
 //------------
 // looper.js
@@ -350,8 +460,7 @@ function Looper(options) {
     /**
      * Add a device to the list of devices in the mesh network.
      */
-    function addDevice() {
-
+    function addDevice(options) {
         deviceCount = deviceCount + 1;
 
         var overlay = '';
@@ -514,6 +623,7 @@ function EventLoop(options) {
         var updatedEventLoop = [];
         for (var i = 0; i < eventSequence.length; i++) {
             loopEvent = eventSequence[i];
+            loopEvent.event.options.index = i; // HACK: Update the behavior index
             updatedEventLoop.push(loopEvent.event);
         }
 
@@ -531,6 +641,7 @@ function Event(options) {
         state: 'INVALID', // INVALID, FLOATING, MOVING, ENTANGLED, SEQUENCED
         //visible: true
         behavior: null,
+        options: {},
         going: false,
         label: '?'
     };
@@ -584,7 +695,8 @@ function Behavior(options) {
         // going: false,
         label: '?',
         visible: false,
-        script: null // The script to do the behavior. The "script" to run to execute the behavior.
+        script: null, // The script to do the behavior. The "script" to run to execute the behavior.
+        options: {}
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -600,6 +712,7 @@ function Behavior(options) {
     this.visible = options.visible;
 
     this.script = options.script;
+    this.options = options.options;
 
     function setPosition(x, y) {
         this.xTarget = x;
@@ -707,7 +820,7 @@ function BehaviorPalette(options) {
     /**
      * Adds a behavior node to the behavior palette
      */
-    function addBehavior(x, y, label, script) {
+    function addBehavior(x, y, label, script, options) {
         var behavior = new Behavior({
             x: x, // was ev.gesture.center.pageX,
             y: y, // was ev.gesture.center.pageY,
@@ -719,8 +832,11 @@ function BehaviorPalette(options) {
             // script: function() {
             //     console.log("DOING " + this.label);
             // }
-            script: script
+            script: script,
+            options: options
         });
+        console.log(behavior.script);
+        console.log(behavior.options);
         this.behaviors.push(behavior);
     }
     this.addBehavior = addBehavior;
@@ -793,6 +909,7 @@ function setupGestures(device) {
                     // Update for selected behavior
                     loopEvent.label = behavior.label;
                     loopEvent.behavior = behavior.script;
+                    loopEvent.options = behavior.options;
 
                     console.log(loopEvent);
 
@@ -901,6 +1018,9 @@ function setupGestures(device) {
                     loopEvent.y = nearestPosition.y;
                     loopEvent.state = 'SEQUENCED';
 
+                    // Update loop ordering
+                    // device.processingInstance.eventLoop.updateLoopOrdering();
+
                     // TODO: Upload/Submit/Push/Send the update to MCU.
 
                     // Start the event loop if any events exist
@@ -910,7 +1030,8 @@ function setupGestures(device) {
                     }
 
                     // Callback to server to update the program
-                    loopEvent.behavior();
+                    loopEvent.behavior(loopEvent.options);
+
                 } else {
 
                     // Update position of the event node and set as "floating"
@@ -923,11 +1044,11 @@ function setupGestures(device) {
                     }
 
                     // Push the behavior change to the server
-                    // TODO: Remote the behavior from the program
+                    // TODO: Remove the behavior from the program
                 }
 
                 // Deploy code to Pixel module (i.e., the Espruino)
-                device.deploy();
+                // device.deploy();
 
                 disableEventCreate = false;
 
@@ -1127,31 +1248,22 @@ function Device(options) {
         });
 
         // Add "default" behaviors to palette
-        processing.behaviorPalette.addBehavior(-100, 0, 'light on', function() {
+        processing.behaviorPalette.addBehavior(-100, 0, 'light on', function(options) {
             console.log('light on top level');
-            pin(5, 1, 0, 1, 1);
+            pin(options);
+            // pin({ index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
             // TODO: Keep track of state... has this been sent yet?
-        });
-        processing.behaviorPalette.addBehavior(100, 0, 'light off', function() {
+        }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 1 });
+        processing.behaviorPalette.addBehavior(100, 0, 'light off', function(options) {
             console.log('light off top level');
-            pin(5, 1, 0, 1, 0);
-        });
-        processing.behaviorPalette.addBehavior(0, 0, 'delay', function() {
+
+            pin(options);
+            // pin({ index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 0 });
+        }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 0 });
+        processing.behaviorPalette.addBehavior(0, 0, 'delay', function(options) {
             console.log('delay top level');
-            delay(1000);
-        });
-        // processing.behaviorPalette.addBehavior(100, 0, 'motion', function() {
-        //     console.log('motion top level')
-        // });
-        // processing.behaviorPalette.addBehavior(-100, 0, 'button', function() {
-        //     console.log('button top level')
-        // });
-        // processing.behaviorPalette.addBehavior(-200, 0, 'pin', function() {
-        //     console.log('pin top level')
-        // });
-        // processing.behaviorPalette.addBehavior(200, 0, 'message', function() {
-        //     console.log('message top level')
-        // });
+            delay(options);
+        }, { index: -1, milliseconds: 1000 });
 
         // Override setup function
         processing.setup = function() {
@@ -1175,6 +1287,7 @@ function Device(options) {
                 processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + 0.05*processing.PI, 1.45*processing.PI);
 
                 // Highlight a section of the arc
+                /*
                 processing.strokeWeight(8.0);
                 processing.stroke(65, 65, 65);
                 processing.noFill();
@@ -1182,6 +1295,7 @@ function Device(options) {
                 var offset = 0.0;
                 var length = 0.15;
                 processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + ((offset + 0.05) * processing.PI), (-processing.PI/2) + ((offset + 0.05 + length) * processing.PI));
+                */
 
                 // Draw arrow
                 processing.strokeWeight(1.0);

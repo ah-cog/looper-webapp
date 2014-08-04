@@ -1,281 +1,8 @@
+// devices = [];
+deviceCount = -1;
+
 disableEventCreate = false;
 showPalette = false;
-
-// Pixel addresses
-deviceAddresses = [];
-deviceAddresses[0] = "192.168.43.190"; // "192.168.69.146"; // deviceAddresses[0] = "10.10.0.146";
-deviceAddresses[1] = "192.168.69.118";
-deviceAddresses[2] = "10.10.0.112";
-// - 10.10.0.118 (Blue, 1)
-// - 10.10.0.137 (Yellow, 2)
-// - 10.10.0.112 (Red, 3)
-
-//
-// looper-library.js
-//
-// Description: Interface for interacting with an embedded device's server.
-//
-// TODO: Move to another file that only includes the library to a client's server.
-//
-
-// Library:
-//
-// Utilities: 
-// - post (Utility for HTTP POSTs)
-// - get (Utility for HTTP GETs)
-//
-// Interface:
-//   /pin
-//   /delay
-//   /erase
-//
-//   /analog-pin
-//   /digital-pin
-//   /pwm (needed in addition to analog?)
-//   /behavior (POST to upload, GET to download)
-//   /memorize or /remember (store in memory for later recall)
-//   /report or /recall (store in recall from memory)
-//   /module/color (of module)
-//   /module/orientation
-//   /debug/firmware
-//   /debug/log
-//
-// - setColor/getColor (of module)
-// - getNeighbors
-// - getBehavior
-//
-// Candidates for Interface:
-//
-//   /in or /input
-//   /out or /output
-//   /store or /push
-//   /load or /pop
-//   /call or /remember
-//   /upload (submit JSON code) [Alternatives: behavior, firmware, sketch, code]
-//   /download
-//   /sync
-//   /action (behavior consists of one or more actions)
-
-// function Device() {
-//     // TODO: Implement device... add post, get, pin, pwm, etc. so they can be called for this device!
-// }
-
-
-/**
- * Send a POST request to the specified address.
- */
-function post(address, params, callback) {
-    var http = new XMLHttpRequest();
-    // var address = "http://physical.computer/pin";
-    // var params = "pin=" + pin + "&operation=" + operation + "&type=" + type + "&mode=" + mode + "&value=" + value + "";
-    var uri = address.concat('?', params);
-    
-    http.open("POST", uri, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-           callback(); // The callback function
-        }
-    }
-    http.send(params);
-}
-
-/**
- * Send a GET request to the specified address.
- */
-function get(address, params, callback) {
-    var http = new XMLHttpRequest();
-    // var address = "http://physical.computer/pin";
-    // var params = "pin=" + pin + "&operation=" + operation + "&type=" + type + "&mode=" + mode + "&value=" + value + "";
-    var uri = address.concat('?', params);
-    
-    http.open("GET", uri, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-           callback(); // The callback function
-        }
-    }
-    http.send(params);
-}
-
-// TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
-//function pin(index, pin, operation, type, mode, value) {
-function pin(options) {
-    var defaults = {
-        index: -1,
-        pin: -1,
-        operation: 0,
-        type: 0,
-        mode: 0,
-        value: 0
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-
-    var http = new XMLHttpRequest();
-    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
-    var url = deviceUri.concat("/pin");
-    var params = "index=" + options['index'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
-    url = url.concat('?', params);
-    
-    http.open("POST", url, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
-    http.setRequestHeader('X-PINGOTHER', 'pingpong');
-    
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-           console.log(http.responseText);
-        }
-    }
-    http.send(params);
-}
-
-function defaultCallback() {
-
-}
-
-function getPin(options, callback) {
-    var defaults = {
-        index: -1,
-        pin: -1,
-        operation: 1,
-        type: 0,
-        mode: 0,
-        value: 0
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-
-    var http = new XMLHttpRequest();
-    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
-    var url = deviceUri.concat("/pin");
-    var params = "index=" + options['index'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
-    url = url.concat('?', params);
-    
-    http.open("GET", url, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
-    http.setRequestHeader('X-PINGOTHER', 'pingpong');
-    
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-
-            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
-
-            if (callback !== undefined) {
-                callback(); // The callback function
-            }
-        }
-    }
-    http.send(params);
-}
-
-function getPins(options, callback) {
-    var defaults = {
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-
-    var http = new XMLHttpRequest();
-    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
-    var url = deviceUri.concat("/pins");
-    var params = "";
-    url = url.concat('?', params);
-    
-    http.open("GET", url, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
-    http.setRequestHeader('X-PINGOTHER', 'pingpong');
-    
-    http.onreadystatechange = function() { // Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-
-            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
-
-            console.log(http.responseText);
-            
-            if (callback !== undefined) {
-                callback(); // The callback function
-            }
-        }
-    }
-    http.send(params);
-}
-
-// getPin()
-
-function delay(options) {
-    var defaults = {
-        index: -1,
-        milliseconds: 1000
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-
-    var http = new XMLHttpRequest();
-    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
-    var url = deviceUri.concat("/delay");
-    var params = "index=" + options['index'] + "&milliseconds=" + options['milliseconds'] + "";
-    url = url.concat('?', params);
-
-    http.open("POST", url, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-    http.onreadystatechange = function() { //Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-            console.log(http.responseText);
-        }
-    }
-    http.send(params);
-}
-
-function erase(options) {
-    var defaults = {
-        // TODO: List default parameter values here.
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-
-    var http = new XMLHttpRequest();
-    var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
-    var url = deviceUri.concat("/erase");
-    var params = "";
-
-    http.open("POST", url, true);
-
-    // Send the proper header information along with the request
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-    http.onreadystatechange = function() { //Call a function when the state changes.
-        if(http.readyState == 4 && http.status == 200) {
-            console.log(http.responseText);
-        }
-    }
-    http.send(params);
-}
-
-
-
-
-
-
-
 
 /**
 * super simple carousel
@@ -297,7 +24,7 @@ function Carousel(element) {
     /**
      * initial
      */
-    this.init = function() {
+    this.setup = function() {
         setPaneDimensions();
 
         $(window).on("load resize orientationchange", function() {
@@ -422,7 +149,7 @@ function Carousel(element) {
 }
 
 var carousel = new Carousel("#carousel");
-carousel.init();
+carousel.setup();
 
 //------------
 // looper.js
@@ -451,16 +178,16 @@ function Looper(options) {
     /** The devices in the local mesh network. */
     this.devices = [];
 
-    /** The domain-specific language. */
-    this.commands = [];
-    this.commands.push("turn on");
-    this.commands.push("turn off");
-    this.commands.push("delay");
-
     /**
      * Add a device to the list of devices in the mesh network.
      */
     function addDevice(options) {
+        var defaults = {
+            address: null
+        };
+        var options = options || {};
+        var options = $.extend({}, defaults, options);
+
         deviceCount = deviceCount + 1;
 
         var overlay = '';
@@ -475,7 +202,8 @@ function Looper(options) {
         $('#panes').append('<li class="pane' + deviceCount + '">' + overlay + '<canvas id="canvas' + deviceCount + '" style="width: 100%; height: 100%;"></canvas></li>');
         canvas = "canvas" + deviceCount;
 
-        var device = new Device({ canvas: canvas });
+        // Create device object
+        var device = new Device({ canvas: canvas, address: options['address'] });
         device.looper = this;
         device.index = deviceCount; // TODO: Replace with node/node UUID
         setupGestures(device);
@@ -485,12 +213,36 @@ function Looper(options) {
          * Re-initialize Carousel after adding the new device pane
          */
         this.carousel = new Carousel("#carousel");
-        this.carousel.init();
+        this.carousel.setup();
         // this.carousel.showPane(deviceCount);
 
         $('#overlay' + deviceCount).hide();
     }
     this.addDevice = addDevice;
+
+    /**
+     * Returns the device at the specified index.
+     */
+    function getDevice(index) {
+        this.devices[index];
+    }
+    this.getDevice = getDevice;
+
+    /**
+     * Returns the device at the specified index.
+     */
+    // function getCurrentDevice() {
+    //     this.devices[this.getCurrentPane];
+    // }
+    // this.getCurrentDevice = getCurrentDevice;
+
+    /**
+     * Returns the current device's address.
+     */
+    // function getCurrentDeviceAddress() {
+    //     this.devices[this.getCurrentPane()].address;
+    // }
+    // this.getCurrentDeviceAddress = getCurrentDeviceAddress;
 
     function showDeviceByIndex(index) {
         this.carousel.showPane(index + 1);
@@ -503,7 +255,7 @@ function Looper(options) {
     this.getCurrentPane = getCurrentPane;
 }
 
-function EventLoop(options) {
+function Loop(options) {
     var defaults = {
         events: [],
         going: false,
@@ -518,14 +270,14 @@ function EventLoop(options) {
     this.going = options.going;
 
     function go() {
-        this.updateLoopOrdering();
+        this.updateOrdering();
         this.going = true;
     }
     this.go = go;
 
     function stop() {
         this.going = false;
-        this.updateLoopOrdering();
+        this.updateOrdering();
 
         // Stop all events in the event loop
         for (var i = 0; i < this.events.length; i++) {
@@ -535,19 +287,12 @@ function EventLoop(options) {
     }
     this.stop = stop;
 
-    function toggle() {
-        if (this.going) {
-            this.stop();
-        } else {
-            this.go();
-        }
-    }
-    this.toggle = toggle;
-
     function step() {
         if (this.going) {
             var previousEvent = this.events[this.position];
-            previousEvent.stop();
+            if (previousEvent !== undefined) {
+                previousEvent.stop();
+            }
 
             this.position = (this.position + 1) % this.events.length;
             // console.log('new position = ' + this.position);
@@ -560,25 +305,10 @@ function EventLoop(options) {
     }
     this.step = step;
 
-    function getAngle(x, y) {
-        var deltaX = x - ($(window).width() / 2);
-        var deltaY = y - ($(window).height() / 2);
-        var angleInRadians = Math.atan2(deltaY, deltaX); // * 180 / PI;
-        if (angleInRadians < 0) {
-            angleInRadians = Math.PI + (Math.PI + angleInRadians);
-        }
-        angleInRadians = angleInRadians + (Math.PI / 2); // Offset by (PI / 2) radians
-        if (angleInRadians > (2 * Math.PI)) {
-            angleInRadians = angleInRadians - (2 * Math.PI);
-        }
-        return angleInRadians;
-    }
-    // processing.getAngle;
-
     /**
      * Re-orders the events in the event loop.
      */
-    function updateLoopOrdering() {
+    function updateOrdering() {
         var eventSequence = [];
 
         var eventCount = this.events.length;
@@ -608,28 +338,32 @@ function EventLoop(options) {
             eventSequence[j+1] = loopEvent;
         }
 
-        // console.log(eventSequence);
-
-        // for (var i = 0; i < eventSequence.length; i++) {
-        //     loopEvent = eventSequence[i];
-
-        //     // console.log(loopEvent);
-
-        //     var behaviorScript = loopEvent.event.behavior;
-        // }
-
-        //return eventSequence;
-
+        // Update the sequence to the sorted list of behaviors
         var updatedEventLoop = [];
         for (var i = 0; i < eventSequence.length; i++) {
             loopEvent = eventSequence[i];
-            loopEvent.event.options.index = i; // HACK: Update the behavior index
+            loopEvent.event.options.index = i; // HACK: Update the behavior's index in the loop
             updatedEventLoop.push(loopEvent.event);
         }
 
         this.events = updatedEventLoop;
     }
-    this.updateLoopOrdering = updateLoopOrdering;
+    this.updateOrdering = updateOrdering;
+
+    function getAngle(x, y) {
+        var deltaX = x - ($(window).width() / 2);
+        var deltaY = y - ($(window).height() / 2);
+        var angleInRadians = Math.atan2(deltaY, deltaX); // * 180 / PI;
+        if (angleInRadians < 0) {
+            angleInRadians = Math.PI + (Math.PI + angleInRadians);
+        }
+        angleInRadians = angleInRadians + (Math.PI / 2); // Offset by (PI / 2) radians
+        if (angleInRadians > (2 * Math.PI)) {
+            angleInRadians = angleInRadians - (2 * Math.PI);
+        }
+        return angleInRadians;
+    }
+    // processing.getAngle;
 }
 
 function Event(options) {
@@ -672,15 +406,6 @@ function Event(options) {
         this.going = false;
     }
     this.stop = stop;
-
-    function toggle() {
-        if (this.going) {
-            this.going = false;
-        } else {
-            this.going = true;
-        }
-    }
-    this.toggle = toggle;
 }
 
 function Behavior(options) {
@@ -735,15 +460,6 @@ function Behavior(options) {
         this.visible = false;
     }
     this.hide = hide;
-
-    function toggle() {
-        if (this.visible) {
-            this.visible = false;
-        } else {
-            this.visible = true;
-        }
-    }
-    this.toggle = toggle;
 }
 
 function BehaviorPalette(options) {
@@ -806,18 +522,6 @@ function BehaviorPalette(options) {
     this.hide = hide;
 
     /**
-     * Toggles the visibility of the behavior palette
-     */
-    function toggle() {
-        if (this.visible) {
-            this.visible = false;
-        } else {
-            this.visible = true;
-        }
-    }
-    this.toggle = toggle;
-
-    /**
      * Adds a behavior node to the behavior palette
      */
     function addBehavior(x, y, label, script, options) {
@@ -857,10 +561,10 @@ function setupGestures(device) {
         //
         // Get the touched event node, if one exists
         //
-        var eventCount = device.processingInstance.eventLoop.events.length;
+        var eventCount = device.processingInstance.loopSequence.events.length;
 
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.eventLoop.events[i];
+            var loopEvent = device.processingInstance.loopSequence.events[i];
             if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
                 && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
 
@@ -915,33 +619,25 @@ function setupGestures(device) {
 
                     // Update the state of the event node
                     loopEvent.state = 'MOVING';
-                    device.processingInstance.eventLoop.events.push(loopEvent);
+                    device.processingInstance.loopSequence.events.push(loopEvent);
                 }
 
             }
         }
 
-
-
-
-
-
         //
         // Get the touched event node, if one exists
         //
-        var eventCount = device.processingInstance.eventLoop.events.length;
+        var eventCount = device.processingInstance.loopSequence.events.length;
 
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.eventLoop.events[i];
+            var loopEvent = device.processingInstance.loopSequence.events[i];
             if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
                 && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
 
                 //loopEvent.visible = false;
                 loopEvent.state = 'MOVING';
                 disableEventCreate = true;
-
-                // var index = Math.random() * 2;
-                // loopEvent.behavior = device.looper.commands[parseInt(index)];
 
                 console.log("\tevent " + i);
                 break;
@@ -952,32 +648,17 @@ function setupGestures(device) {
         // Check of "go" button touched
         //
 
-        if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
-            && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight - 100) && (device.processingInstance.screenHeight - 100) < ev.gesture.center.pageY + 50)) {
+        // if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
+        //     && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight - 100) && (device.processingInstance.screenHeight - 100) < ev.gesture.center.pageY + 50)) {
 
-            var sequence = device.processingInstance.getEventSequence();
+        //     var sequence = device.processingInstance.getBehaviorSequence();
 
-            // Start the event loop if any events exist
-            if (sequence.length > 0) {
-                //console.log("go");
-                device.processingInstance.eventLoop.toggle(); // toggle "go" and "stop"
-            }
-        }
-
-        //
-        // Check if "script" button touched
-        //
-
-        if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
-            && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight / 2 - 90) && (device.processingInstance.screenHeight / 2 - 90) < ev.gesture.center.pageY + 50)) {
-            //&& (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight / 7 + 20) && (device.processingInstance.screenHeight / 7 + 20) < ev.gesture.center.pageY + 50)) {
-
-            // Prompt for new script name
-            var newScriptName = prompt("Type a name for this script", "script");
-            if (newScriptName.length > 0) {
-                scriptName = newScriptName;
-            }
-        }
+        //     // Start the event loop if any events exist
+        //     if (sequence.length > 0) {
+        //         //console.log("go");
+        //         device.processingInstance.loopSequence.toggle(); // toggle "go" and "stop"
+        //     }
+        // }
 
         ev.gesture.preventDefault();
         ev.stopPropagation();
@@ -994,9 +675,9 @@ function setupGestures(device) {
         var touches = ev.gesture.touches;
 
         // Get the touched object, if one exists
-        var eventCount = device.processingInstance.eventLoop.events.length;
+        var eventCount = device.processingInstance.loopSequence.events.length;
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.eventLoop.events[i];
+            var loopEvent = device.processingInstance.loopSequence.events[i];
 
             if (loopEvent.state === 'MOVING') {
 
@@ -1019,14 +700,14 @@ function setupGestures(device) {
                     loopEvent.state = 'SEQUENCED';
 
                     // Update loop ordering
-                    // device.processingInstance.eventLoop.updateLoopOrdering();
+                    // device.processingInstance.loopSequence.updateOrdering();
 
                     // TODO: Upload/Submit/Push/Send the update to MCU.
 
                     // Start the event loop if any events exist
-                    var sequence = device.processingInstance.getEventSequence();
+                    var sequence = device.processingInstance.getBehaviorSequence();
                     if (sequence.length > 0) {
-                        device.processingInstance.eventLoop.go(); // toggle "go" and "stop"
+                        device.processingInstance.loopSequence.go(); // toggle "go" and "stop"
                     }
 
                     // Callback to server to update the program
@@ -1034,21 +715,33 @@ function setupGestures(device) {
 
                 } else {
 
+                    // TODO: Remove behavior from the behavior loop!
+
+                    console.log("DELETING");
+
                     // Update position of the event node and set as "floating"
                     loopEvent.state = 'FLOATING';
 
+                    console.log("Deleting " + loopEvent.options.index);
+
+                    deleteBehavior({ index: loopEvent.options.index });
+
+                    // Update loop ordering
+                    // device.processingInstance.loopSequence.updateOrdering();
+
                     // Stop the event loop if no nodes are placed on it
-                    var sequence = device.processingInstance.getEventSequence();
+                    var sequence = device.processingInstance.getBehaviorSequence();
                     if (sequence.length == 0) {
-                        device.processingInstance.eventLoop.stop();
+                        device.processingInstance.loopSequence.stop();
+                    } else {
+                        device.processingInstance.loopSequence.go(); // toggle "go" and "stop"
                     }
 
                     // Push the behavior change to the server
                     // TODO: Remove the behavior from the program
                 }
 
-                // Deploy code to Pixel module (i.e., the Espruino)
-                // device.deploy();
+                // TODO: Deploy behavior to device (via HTTP requests).
 
                 disableEventCreate = false;
 
@@ -1069,29 +762,6 @@ function setupGestures(device) {
      */
     $(currentCanvas).hammer({ drag_max_touches: 0, hold_timeout: 200 }).on("hold", function(ev) {
         console.log("'hold' event!");
-
-        //
-        // Get the touched event node, if one exists
-        //
-        // var eventCount = device.processingInstance.eventLoop.events.length;
-
-        // for (var i = 0; i < eventCount; i++) {
-        //     var loopEvent = device.processingInstance.eventLoop.events[i];
-        //     if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
-        //         && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
-
-        //         //loopEvent.visible = false;
-        //         // loopEvent.state = 'MOVING';
-        //         // disableEventCreate = true;
-
-        //         // var index = Math.random() * 2;
-        //         // loopEvent.go = device.looper.commands[parseInt(index)];
-        //         alert("foo");
-
-        //         console.log("\tevent " + i);
-        //         break;
-        //     }
-        // }
 
         if (!disableEventCreate) {
             disableEventCreate = true;
@@ -1122,7 +792,7 @@ function setupGestures(device) {
             // });
 
             // loopEvent.state = 'MOVING';
-            // device.processingInstance.eventLoop.events.push(loopEvent);
+            // device.processingInstance.loopSequence.events.push(loopEvent);
         }
 
         ev.gesture.preventDefault();
@@ -1132,18 +802,13 @@ function setupGestures(device) {
     });
 }
 
-// devices = [];
-deviceCount = -1;
-
 /**
  * Add an expressive interface to a device.
  */
 function Device(options) {
-
-    /** Set up object defaults */
     var defaults = {
-        canvas: null, // Canvas instance
-        // eventLoop: null
+        address: null,
+        canvas: null
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -1153,55 +818,42 @@ function Device(options) {
         return;
     }
 
+    this.address = options['address'];
+
     this.canvas = options.canvas;
 
-    this.scriptName = "pixel";
     // this.disableEventCreate = false;
     this.showPalette = false;
     this.font = null;
-    // this.looper;
 
     function getLooper() {
       return this.looper;
     }
     this.getLooper = getLooper;
 
+    /**
+     * Returns the device at the specified index.
+     */
     function getDevice(index) {
       return this.looper.devices[index];
     }
     this.getDevice = getDevice;
 
-    function getEventLoop(index) {
-      return this.looper.devices[index].processingInstance.eventLoop;
+    /**
+     * Returns the device at the specified index.
+     */
+    function getAddress() {
+      return this.address;
     }
-    this.getEventLoop = getEventLoop;
-
-    function getEventSequence(index) {
-      return this.looper.devices[index].processingInstance.eventLoop.events;
-    }
-    this.getEventSequence = getEventSequence;
+    this.getAddress = getAddress;
 
     /**
-     * Deploy the current state of the program to the module
+     * Returns the behavior of the device with the specified index.
      */
-    function deploy() {
-        console.log("Download code to the Espruino");
-        // TODO: Push the current Looper state to the Espruino with an HTTP POST
-
-        // device.looper.devices[0].processingInstance.eventLoop.events
-        // var events = this.looper.devices[0].processingInstance.eventLoop.events;
-        var events = this.getEventSequence(0);
-        var program = '';
-        for (var i = 0; i < events.length; i++) {
-          program = program + getEventSequence(0)[i].behavior + '\n';
-          //alert(this.looper.devices[0].processingInstance.eventLoop.events[i].behavior);
-        }
-        console.log(program);
-        //loopEvent.behavior = behavior.script;
+    function getBehaviorSequence(deviceIndex) {
+      return this.looper.devices[deviceIndex].processingInstance.loopSequence.events;
     }
-    this.deploy = deploy;
-
-    // TODO: Implement function to get current state of Looper's state on the Espruino
+    this.getBehaviorSequence = getBehaviorSequence;
 
     /**
      * Processing sketch code
@@ -1234,9 +886,7 @@ function Device(options) {
         // var backgroundColor = processing.color(color.red, color.green, color.blue);
         var backgroundColor = processing.color(240, 241, 240);
 
-        var scriptName = "pixel";
-
-        processing.eventLoop = new EventLoop();
+        processing.loopSequence = new Loop();
 
         // Create behavior palette
         processing.behaviorPalette = new BehaviorPalette({
@@ -1247,39 +897,50 @@ function Device(options) {
             visible: false
         });
 
-        // Add "default" behaviors to palette
-        processing.behaviorPalette.addBehavior(-100, 0, 'light on', function(options) {
-            console.log('light on top level');
-            pin(options);
-            // pin({ index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
-            // TODO: Keep track of state... has this been sent yet?
-        }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 1 });
-        processing.behaviorPalette.addBehavior(100, 0, 'light off', function(options) {
-            console.log('light off top level');
+        /**
+         * Setup behavior palette.
+         */
+        processing.setupBehaviorPalette = function() {
+            // Add "default" behaviors to palette
+            processing.behaviorPalette.addBehavior(-100, 0, 'light', function(options) {
+                console.log('light on top level');
+                setPin(options);
+                // TODO: Keep track of state... has this been sent yet?
+            }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 1 });
 
-            pin(options);
-            // pin({ index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 0 });
-        }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 0 });
-        processing.behaviorPalette.addBehavior(0, 0, 'delay', function(options) {
-            console.log('delay top level');
-            delay(options);
-        }, { index: -1, milliseconds: 1000 });
+            processing.behaviorPalette.addBehavior(100, 0, 'time', function(options) {
+                console.log('delay top level');
+                delay(options);
+            }, { index: -1, milliseconds: 1000 });
+            
+            processing.behaviorPalette.addBehavior(0, 0, 'motion', function(options) {
+                console.log('light off top level');
 
-        // Override setup function
+                setPin(options);
+            }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 0 });
+        }
+
+        /**
+         * Override setup function.
+         */
         processing.setup = function() {
             processing.size(processing.screenWidth, processing.screenHeight);
 
             this.font = processing.loadFont("http://physical.computer/DidactGothic.ttf");
+
+            this.setupBehaviorPalette();
         }
 
-        // Override draw function, by default it will be called 60 times per second
+        /**
+         * Override draw function. By default, it will be called 60 times per second.
+         */
         processing.draw = function() {
 
-            function drawEventLoop() {
+            function drawLoop() {
 
                 processing.pushMatrix();
 
-                // Draw the "loop" circular arc
+                // Draw the loop
                 processing.strokeWeight(1.0);
                 processing.stroke(65, 65, 65);
                 processing.noFill();
@@ -1297,7 +958,7 @@ function Device(options) {
                 processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + ((offset + 0.05) * processing.PI), (-processing.PI/2) + ((offset + 0.05 + length) * processing.PI));
                 */
 
-                // Draw arrow
+                // Draw the loop's arrowhead to indicate its sequence order
                 processing.strokeWeight(1.0);
                 processing.stroke(65, 65, 65);
                 processing.translate(processing.screenWidth / 2, processing.screenHeight / 2);
@@ -1309,34 +970,37 @@ function Device(options) {
                 processing.popMatrix();
             }
 
-            function drawEvents() {
+            /**
+             * Draw behaviors.
+             */
+            function drawBehaviors() {
 
                 processing.pushMatrix();
 
-                var eventCount = processing.eventLoop.events.length;
+                var eventCount = processing.loopSequence.events.length;
                 for (var i = 0; i < eventCount; i++) {
-                    var loopEvent = processing.eventLoop.events[i];
+                    var behavior = processing.loopSequence.events[i];
 
-                    processing.updatePosition(loopEvent);
+                    processing.updatePosition(behavior);
 
                     // Draw the event node
                     processing.fill(66, 214, 146);
-                    if (loopEvent.going) {
-                        processing.ellipse(loopEvent.x, loopEvent.y, 70, 70);
+                    if (behavior.going) {
+                        processing.ellipse(behavior.x, behavior.y, 70, 70);
 
                         // Show the program counter
-                        if (loopEvent.state == 'SEQUENCED') {
-                            var angle = getAngle(loopEvent.x, loopEvent.y);
+                        if (behavior.state == 'SEQUENCED') {
+                            var angle = getAngle(behavior.x, behavior.y);
                             var nearestX = processing.screenWidth / 2 + (500 / 2) * Math.cos(angle - Math.PI  / 2);
                             var nearestY = processing.screenHeight / 2 + (500 / 2) * Math.sin(angle - Math.PI  / 2);
                             processing.ellipse(nearestX, nearestY, 20, 20);
                         }
                     } else {
-                        processing.ellipse(loopEvent.x, loopEvent.y, 70, 70);
+                        processing.ellipse(behavior.x, behavior.y, 70, 70);
 
                         // // Draw options for the sequenced node
-                        // if (loopEvent.state == 'SEQUENCED') {
-                        //     processing.ellipse(loopEvent.x + 40, loopEvent.y - 40, 30, 30);
+                        // if (behavior.state == 'SEQUENCED') {
+                        //     processing.ellipse(behavior.x + 40, behavior.y - 40, 30, 30);
                         // }
                     }
 
@@ -1344,23 +1008,28 @@ function Device(options) {
                     processing.textFont(primaryFont, 16);
                     processing.textAlign(processing.CENTER);
                     processing.fill(65, 65, 65);
-                    processing.text(loopEvent.label, loopEvent.x, loopEvent.y + 4);
+                    var label = behavior.label;
+                    if (behavior.label === 'light') {
+                        label = 'light on';
+                    }
+                    processing.text(label, behavior.x, behavior.y + 4);
 
                     // Calculate nearest point on circle
-                    //line(loopEvent.x, loopEvent.y, screenWidth / 2, screenHeight / 2);
+                    //line(behavior.x, behavior.y, screenWidth / 2, screenHeight / 2);
                 }
 
                 processing.popMatrix();
             }
 
+            /**
+             * Draws the behavior palette.
+             */
             function drawBehaviorPalette() {
 
                 processing.behaviorPalette.updatePosition();
 
                 if (processing.behaviorPalette.visible) {
-
                     drawBehaviors();
-
                 }
 
                 function drawBehaviors() {
@@ -1383,37 +1052,6 @@ function Device(options) {
 
                         processing.popMatrix();
                     }
-
-
-
-
-                    // processing.pushMatrix();
-
-                    // var eventCount = processing.eventLoop.events.length;
-                    // for (var i = 0; i < eventCount; i++) {
-                    //     var loopEvent = processing.eventLoop.events[i];
-
-                    //     processing.updatePosition(loopEvent);
-
-                    //     // Draw the event node
-                    //     processing.fill(66, 214, 146);
-                    //     if (loopEvent.going) {
-                    //         processing.ellipse(loopEvent.x, loopEvent.y, 80, 80);
-                    //     } else {
-                    //         processing.ellipse(loopEvent.x, loopEvent.y, 60, 60);
-                    //     }
-
-                    //     primaryFont = processing.createFont("DidactGothic.ttf", 32);
-                    //     processing.textFont(primaryFont, 16);
-                    //     processing.textAlign(processing.CENTER);
-                    //     processing.fill(65, 65, 65);
-                    //     processing.text(loopEvent.label, loopEvent.x, loopEvent.y + 4);
-
-                    //     // Calculate nearest point on circle
-                    //     //line(loopEvent.x, loopEvent.y, screenWidth / 2, screenHeight / 2);
-                    // }
-
-                    // processing.popMatrix();
                 }
             }
 
@@ -1475,24 +1113,16 @@ function Device(options) {
              * Returns the sequence of events in the event queue.
              * @return {[type]} [description]
              */
-            function getEventSequence() {
+            function getBehaviorSequence() {
                 var eventSequence = [];
 
-                var eventCount = processing.eventLoop.events.length;
+                var eventCount = processing.loopSequence.events.length;
 
                 // Populate array for sorting
                 for (var i = 0; i < eventCount; i++) {
-                    var loopEvent = processing.eventLoop.events[i];
+                    var loopEvent = processing.loopSequence.events[i];
                     if (loopEvent.state === 'SEQUENCED') {
-                        // loopEvent.go = function() { console.log("action " + i); }
-                        // loopEvent.behavior = function() {
-                        // loopEvent.go = function() {
-                        //     // var command = loopEvent.go;
-                        //     var index = Math.random() * 2;
-                        //     // command = this.looper.commands[parseInt(index)];
-                        //     command = "turn on";
-                        //     console.log("instr: " + command);
-                        // }
+                        
                         eventSequence.push({
                             event: loopEvent,
                             angle: processing.getAngle(loopEvent.x, loopEvent.y)
@@ -1526,7 +1156,7 @@ function Device(options) {
 
                 return eventSequence;
             }
-            processing.getEventSequence = getEventSequence;
+            processing.getBehaviorSequence = getBehaviorSequence;
 
             function lineDistance(x1, y1, x2, y2) {
                 var xs = 0;
@@ -1617,32 +1247,22 @@ function Device(options) {
             processing.textFont(primaryFont, 26);
             processing.textAlign(processing.CENTER);
             processing.fill(65, 65, 65);
-            if (processing.eventLoop.going) {
+            if (processing.loopSequence.going) {
                 processing.text("stop", processing.screenWidth / 2, processing.screenHeight - 100);
             } else {
                 processing.text("go", processing.screenWidth / 2, processing.screenHeight - 100);
             }
             */
 
-            // draw script name
-            /*
-            primaryFont = processing.createFont("http://physical.computer/DidactGothic.ttf", 16);
-            processing.textFont(primaryFont, 50);
-            processing.textAlign(processing.CENTER);
-            processing.fill(65, 65, 65);
-            //processing.text(scriptName, processing.screenWidth / 2, processing.screenHeight / 7 + 20);
-            processing.text(scriptName, processing.screenWidth / 2, processing.screenHeight / 2 + 10);
-            */
-
             // step to next node in loop
             processing.currentTime = (new Date()).getTime();
             if (processing.currentTime > (processing.previousTime + processing.stepFrequency)) {
                 processing.previousTime = processing.currentTime;
-                processing.eventLoop.step(); // toggle "go" and "stop"
+                processing.loopSequence.step();
             }
 
-            drawEventLoop();
-            drawEvents();
+            drawLoop();
+            drawBehaviors();
 
             drawBehaviorPalette();
         };
@@ -1652,6 +1272,6 @@ function Device(options) {
     this.processingInstance = new Processing(canvas, deviceSketch);
     this.processingInstance.canvas = canvas;
     this.processingInstance.deviceCount = deviceCount;
-    // this.eventLoop = this.processingInstance.eventLoop;
+    // this.loopSequence = this.processingInstance.loopSequence;
     console.log(this.processingInstance);
 }

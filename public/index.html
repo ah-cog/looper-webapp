@@ -98,14 +98,15 @@
     }
     </script>
 
-    <!-- <script src="http://physical.computer/javascripts/looper.js"></script> -->
+    <script src="/javascripts/pixel.js"></script>
     <script src="/javascripts/looper.js"></script>
     <script>
     looper = new Looper();
-    looper.addDevice();
-    looper.addDevice();
-    looper.addDevice();
+    looper.addDevice({ address: "192.168.69.146" });
+    // looper.addDevice();
+    // looper.addDevice();
     looper.showDeviceByIndex(0);
+    erase();
     </script>
 
 </body>

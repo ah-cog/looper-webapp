@@ -1009,9 +1009,13 @@ function Device(options) {
                     processing.textAlign(processing.CENTER);
                     processing.fill(65, 65, 65);
                     var label = behavior.label;
-                    if (behavior.label === 'light') {
-                        label = 'light on';
-                    }
+                    // if (behavior.label === 'light') {
+                    //     label = 'light on';
+                    // } else if (behavior.label === 'light on') {
+                    //     label = 'light off';
+                    // } else if (behavior.label === 'light off') {
+                    //     label = 'light on';
+                    // }
                     processing.text(label, behavior.x, behavior.y + 4);
 
                     // Calculate nearest point on circle
@@ -1241,19 +1245,6 @@ function Device(options) {
             // erase background
             processing.background(backgroundColor);
 
-            // draw "go" button
-            /*
-            primaryFont = processing.createFont("http://physical.computer/DidactGothic.ttf", 32);
-            processing.textFont(primaryFont, 26);
-            processing.textAlign(processing.CENTER);
-            processing.fill(65, 65, 65);
-            if (processing.loopSequence.going) {
-                processing.text("stop", processing.screenWidth / 2, processing.screenHeight - 100);
-            } else {
-                processing.text("go", processing.screenWidth / 2, processing.screenHeight - 100);
-            }
-            */
-
             // step to next node in loop
             processing.currentTime = (new Date()).getTime();
             if (processing.currentTime > (processing.previousTime + processing.stepFrequency)) {
@@ -1263,7 +1254,6 @@ function Device(options) {
 
             drawLoop();
             drawBehaviors();
-
             drawBehaviorPalette();
         };
     });

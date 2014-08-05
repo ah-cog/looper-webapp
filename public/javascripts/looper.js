@@ -893,7 +893,7 @@ function Device(options) {
             // x: ev.gesture.center.pageX,
             // y: ev.gesture.center.pageY,
             // xTarget: nearestPosition.x,
-            // yTarget: nearestPosition.y
+            // yTarget: nearestPosition.y,
             visible: false
         });
 
@@ -901,6 +901,7 @@ function Device(options) {
          * Setup behavior palette.
          */
         processing.setupBehaviorPalette = function() {
+
             // Add "default" behaviors to palette
             processing.behaviorPalette.addBehavior(-100, 0, 'light', function(options) {
                 console.log('light on top level');
@@ -1061,8 +1062,6 @@ function Device(options) {
 
             /**
              * Updates position of event node.
-             * @param  {[type]} loopEvent [description]
-             * @return {[type]}           [description]
              */
             function updatePosition(loopEvent) {
 
@@ -1115,7 +1114,6 @@ function Device(options) {
 
             /**
              * Returns the sequence of events in the event queue.
-             * @return {[type]} [description]
              */
             function getBehaviorSequence() {
                 var eventSequence = [];
@@ -1162,6 +1160,9 @@ function Device(options) {
             }
             processing.getBehaviorSequence = getBehaviorSequence;
 
+            /**
+             * Returns the distance between the two specified points.
+             */
             function lineDistance(x1, y1, x2, y2) {
                 var xs = 0;
                 var ys = 0;
@@ -1176,6 +1177,9 @@ function Device(options) {
             }
             processing.lineDistance = lineDistance;
 
+            /**
+             * Get the (x,y) point on the loop.
+             */
             function getPointOnCircle(radius, originX, originY, angle) {
                 //var radius = 50;
                 //var originX = 400;
@@ -1190,6 +1194,9 @@ function Device(options) {
                 return result;
             }
 
+            /**
+             * Get the (x,y) point on the loop at the specified angle (in radians).
+             */
             function getPosition(angle) {
 
                 var nearestX = processing.screenWidth / 2 + (400 / 2) * Math.cos(angle);
@@ -1203,6 +1210,9 @@ function Device(options) {
             }
             processing.getPosition = getPosition;
 
+            /**
+             * Get the angle.
+             */
             function getAngle(x, y) {
                 var deltaX = x - (processing.screenWidth / 2);
                 var deltaY = y - (processing.screenHeight / 2);
@@ -1218,6 +1228,9 @@ function Device(options) {
             }
             processing.getAngle = getAngle;
 
+            /**
+             * Returns the coordinates for the point on the loop nearest to the specified point.
+             */
             function getNearestPositionOnEventLoop(x, y) {
                 var deltaX = x - (processing.screenWidth / 2);
                 var deltaY = y - (processing.screenHeight / 2);
@@ -1234,13 +1247,18 @@ function Device(options) {
             }
             processing.getNearestPositionOnEventLoop = getNearestPositionOnEventLoop;
 
+            /**
+             * Get the distance to the loop from the given node.
+             */
             function getDistanceFromEventLoop(loopEvent) {
                 var distance = processing.lineDistance(loopEvent.x, loopEvent.y, loopEvent.xTarget, loopEvent.yTarget);
                 return distance;
             }
             processing.getDistanceFromEventLoop = getDistanceFromEventLoop;
 
-            /** Start of actual loop instructions. The things above are definitions. */
+            /**
+             * Start of actual loop instructions. The things above are definitions.
+             */
 
             // erase background
             processing.background(backgroundColor);

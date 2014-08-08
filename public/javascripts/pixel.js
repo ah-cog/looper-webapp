@@ -122,7 +122,7 @@ function deleteBehavior(options) {
 }
 
 // TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
-function updatePin(options) {
+function updateBehavior(options) {
     var defaults = {
         index: -1,
         pin: -1,

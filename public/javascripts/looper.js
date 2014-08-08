@@ -619,9 +619,17 @@ function BehaviorPalette(options) {
                 if (this.qualities.brightness > 0) {
                     this.qualities.brightness = 0;
                     console.log("off");
+
+                    // Perform behavior
+                    //behavior.procedure(behavior.options);
+                    updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 0 });
                 } else {
                     this.qualities.brightness = 100;
                     console.log("on");
+
+                    // Perform behavior
+                    //behavior.procedure(behavior.options);
+                    updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
                 }
             }
         }
@@ -1174,9 +1182,6 @@ function Device(options) {
 
                                 // Update behavior qualities
                                 behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
-
-                                // Perform behavior
-                                //behavior.procedure(behavior.options);
                             } else {
                                 processing.text("off", nearestX, nearestY + 4);
 
@@ -1184,9 +1189,6 @@ function Device(options) {
 
                                 // Update behavior qualities
                                 behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
-
-                                // Perform behavior
-                                //behavior.procedure(behavior.options);
                             }
                         }
                     }

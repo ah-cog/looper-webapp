@@ -122,6 +122,40 @@ function deleteBehavior(options) {
 }
 
 // TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
+function updatePin(options) {
+    var defaults = {
+        index: -1,
+        pin: -1,
+        operation: 0,
+        type: 0,
+        mode: 0,
+        value: 0
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/pin");
+    var params = "index=" + options['index'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
+    url = url.concat('?', params);
+    
+    http.open("PUT", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+           console.log(http.responseText);
+        }
+    }
+    http.send(params);
+}
+
+// TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
 //function pin(index, pin, operation, type, mode, value) {
 function setPin(options) {
     var defaults = {

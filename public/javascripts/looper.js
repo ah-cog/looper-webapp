@@ -155,10 +155,19 @@ carousel.setup();
 // looper.js
 //------------
 
-// TODO: Define a domain-specific language for the microcontroller.
-function saveScript() {
-    // var script = "" + firepadDevice.firepad.getText();
-    // firepadEvent.behavior = eval('(' + script + ')');
+function BehaviorControl(options) {
+    var defaults = {
+        type: 'none',
+        xOffset: 0,
+        yOffset: 0,
+
+        events: {}, // Event handlers for interaction (i.e., tap, touch, hold, swipe, etc.)
+        draw: null, // Function to draw the control interface
+
+        visible: true
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
 }
 
 /**
@@ -257,14 +266,14 @@ function Looper(options) {
 
 function Loop(options) {
     var defaults = {
-        events: [],
+        behaviors: [],
         going: false,
         position: 0
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
 
-    this.events = options.events; // events on the event loop
+    this.behaviors = options.behaviors; // behaviors on the event loop
 
     this.position = options.position;
     this.going = options.going;
@@ -279,9 +288,9 @@ function Loop(options) {
         this.going = false;
         this.updateOrdering();
 
-        // Stop all events in the event loop
-        for (var i = 0; i < this.events.length; i++) {
-            this.events[i].stop();
+        // Stop all behaviors in the event loop
+        for (var i = 0; i < this.behaviors.length; i++) {
+            this.behaviors[i].stop();
         }
         this.position = 0; // Reset position
     }
@@ -289,15 +298,15 @@ function Loop(options) {
 
     function step() {
         if (this.going) {
-            var previousEvent = this.events[this.position];
+            var previousEvent = this.behaviors[this.position];
             if (previousEvent !== undefined) {
                 previousEvent.stop();
             }
 
-            this.position = (this.position + 1) % this.events.length;
+            this.position = (this.position + 1) % this.behaviors.length;
             // console.log('new position = ' + this.position);
 
-            var currentEvent = this.events[this.position];
+            var currentEvent = this.behaviors[this.position];
             currentEvent.go();
 
             // currentEvent.behavior(); // NOTE: Uncomment this to call the behavior every time it is "going"
@@ -306,18 +315,18 @@ function Loop(options) {
     this.step = step;
 
     /**
-     * Re-orders the events in the event loop.
+     * Re-orders the behaviors in the event loop.
      */
     function updateOrdering() {
-        var eventSequence = [];
+        var behaviorSequence = [];
 
-        var eventCount = this.events.length;
+        var eventCount = this.behaviors.length;
 
         // Populate array for sorting
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = this.events[i];
+            var loopEvent = this.behaviors[i];
             if (loopEvent.state === 'SEQUENCED') {
-                eventSequence.push({
+                behaviorSequence.push({
                     event: loopEvent,
                     angle: getAngle(loopEvent.x, loopEvent.y)
                 });
@@ -327,26 +336,26 @@ function Loop(options) {
         // Perform insertion sort
         var i, j;
         var loopEvent;
-        eventCount = eventSequence.length;
+        eventCount = behaviorSequence.length;
         for (var i = 0; i < eventCount; i++) {
-            loopEvent = eventSequence[i];
+            loopEvent = behaviorSequence[i];
 
-            for (j = i-1; j > -1 && eventSequence[j].angle > loopEvent.angle; j--) {
-                eventSequence[j+1] = eventSequence[j];
+            for (j = i-1; j > -1 && behaviorSequence[j].angle > loopEvent.angle; j--) {
+                behaviorSequence[j+1] = behaviorSequence[j];
             }
 
-            eventSequence[j+1] = loopEvent;
+            behaviorSequence[j+1] = loopEvent;
         }
 
         // Update the sequence to the sorted list of behaviors
         var updatedEventLoop = [];
-        for (var i = 0; i < eventSequence.length; i++) {
-            loopEvent = eventSequence[i];
+        for (var i = 0; i < behaviorSequence.length; i++) {
+            loopEvent = behaviorSequence[i];
             loopEvent.event.options.index = i; // HACK: Update the behavior's index in the loop
             updatedEventLoop.push(loopEvent.event);
         }
 
-        this.events = updatedEventLoop;
+        this.behaviors = updatedEventLoop;
     }
     this.updateOrdering = updateOrdering;
 
@@ -366,7 +375,7 @@ function Loop(options) {
     // processing.getAngle;
 }
 
-function Event(options) {
+function Behavior(options) {
     var defaults = {
         x: null,
         y: null,
@@ -408,7 +417,15 @@ function Event(options) {
     this.stop = stop;
 }
 
-function Behavior(options) {
+// Add "default" behaviors to palette
+/*
+processing.behaviorPalette.addBehavior(-100, 0, 'light', function(options) {
+    console.log('light on top level');
+    setPin(options);
+    // TODO: Keep track of state... has this been sent yet?
+}, { index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
+*/
+function BehaviorPrototype(options) {
     var defaults = {
         x: null,
         y: null,
@@ -418,9 +435,10 @@ function Behavior(options) {
         //visible: true
         // go: null,
         // going: false,
+        type: 'none',
         label: '?',
         visible: false,
-        script: null, // The script to do the behavior. The "script" to run to execute the behavior.
+        procedure: null, // The "template procedure" that describes how to do the behavior.
         options: {}
     };
     var options = options || {};
@@ -432,11 +450,12 @@ function Behavior(options) {
     this.xTarget = options.xTarget;
     this.yTarget = options.yTarget;
 
-    this.label = options.label;
+    this.type = options.type; // The type of behavior. This is a unique type identifier.
+    this.label = options.label; // The "printable name" for the behavior.
 
     this.visible = options.visible;
 
-    this.script = options.script;
+    this.procedure = options.procedure;
     this.options = options.options;
 
     function setPosition(x, y) {
@@ -461,6 +480,29 @@ function Behavior(options) {
     }
     this.hide = hide;
 }
+
+// NOTE: The following is one way to do inheritance.
+//
+// Behavior.prototype.getType = function() {
+//   return "Behavior";
+// }
+
+// function LightBehavior() {
+//   // LightBehavior constructor code goes here 
+// }
+ 
+// // Inherit the methods of Behavior (i.e., the base class)
+// LightBehavior.prototype = new Behavior();
+ 
+// // Override the parent's getName method
+// LightBehavior.prototype.getType = function() {
+//     return "LightBehavior";
+// }
+
+
+
+
+
 
 function BehaviorPalette(options) {
     var defaults = {
@@ -524,28 +566,75 @@ function BehaviorPalette(options) {
     /**
      * Adds a behavior node to the behavior palette
      */
-    function addBehavior(x, y, label, script, options) {
-        var behavior = new Behavior({
-            x: x, // was ev.gesture.center.pageX,
-            y: y, // was ev.gesture.center.pageY,
-            xTarget: x,
-            yTarget: y,
-            label: label,
+    this.addBehavior = function(options) {
+        var defaults = {
+            x: 0,
+            y: 0,
 
-            // e.g.,
-            // script: function() {
-            //     console.log("DOING " + this.label);
-            // }
-            script: script,
-            options: options
+            type: 'none',
+            label: 'none',
+
+            procedure: null,
+            options: null
+        };
+        var options = options || {};
+        var options = $.extend({}, defaults, options);
+
+        // Construct the behavior
+        var behavior = new BehaviorPrototype({
+            x: options.x, // was ev.gesture.center.pageX,
+            y: options.y, // was ev.gesture.center.pageY,
+            xTarget: options.x,
+            yTarget: options.y,
+
+            type: options.type,
+            label: options.label,
+
+            procedure: options.procedure,
+            options: options.options,
+
+            qualities: {}  // The "character" of the behavior based on it's type.
         });
-        console.log(behavior.script);
-        console.log(behavior.options);
-        this.behaviors.push(behavior);
+
+        // Specialize the standard behavior constructed above
+        // IDEA: Add "behavior.history" to store the history of states (or maybe the state transformations)
+        if (behavior.type === 'light') {
+            // behavior.qualities = {}; // Add the "character" or characteristic qualities of the behavior based on it's type.
+            behavior.qualities = {
+                brightness: 0
+            };
+
+            behavior.setBrightness = function(options) {
+                var defaults = {
+                    brightness: 100
+                };
+                var options = options || {};
+                var options = $.extend({}, defaults, options);
+
+                // Change the brightness
+                this.qualities.brightness = options['brightness'];
+            }
+
+            behavior.onClick = function() {
+                if (this.qualities.brightness > 0) {
+                    this.qualities.brightness = 0;
+                    console.log("off");
+                } else {
+                    this.qualities.brightness = 100;
+                    console.log("on");
+                }
+            }
+        }
+
+        console.log(behavior);
+        
+        this.behaviors.push(behavior); // Add the behavior to the loop.
     }
-    this.addBehavior = addBehavior;
 }
 
+/**
+ * Setup screen gesture callback functions.
+ */
 function setupGestures(device) {
 
     var currentCanvas = '#' + device.canvas;
@@ -561,10 +650,10 @@ function setupGestures(device) {
         //
         // Get the touched event node, if one exists
         //
-        var eventCount = device.processingInstance.loopSequence.events.length;
+        var eventCount = device.processingInstance.loopSequence.behaviors.length;
 
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.events[i];
+            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
             if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
                 && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
 
@@ -593,6 +682,9 @@ function setupGestures(device) {
             for(var i = 0; i < behaviorCount; i++) {
                 var behavior = device.processingInstance.behaviorPalette.behaviors[i];
 
+                console.log('behavior:')
+                console.log(behavior);
+
                 // Check if palette option is touched
                 if ((ev.gesture.center.pageX - 50 < behaviorPalette.x + behavior.x && behaviorPalette.x + behavior.x < ev.gesture.center.pageX + 50)
                     && (ev.gesture.center.pageY - 50 < behaviorPalette.y + behavior.y && behaviorPalette.y + behavior.y < ev.gesture.center.pageY + 50)) {
@@ -603,7 +695,7 @@ function setupGestures(device) {
                     // Create behavior node
                     var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
 
-                    var loopEvent = new Event({
+                    var loopEvent = new Behavior({
                         x: device.processingInstance.behaviorPalette.x + behavior.x,
                         y: device.processingInstance.behaviorPalette.y + behavior.y,
                         xTarget: nearestPosition.x,
@@ -612,14 +704,18 @@ function setupGestures(device) {
 
                     // Update for selected behavior
                     loopEvent.label = behavior.label;
-                    loopEvent.behavior = behavior.script;
+                    loopEvent.procedure = behavior.procedure;
                     loopEvent.options = behavior.options;
+
+                    loopEvent.qualities = behavior.qualities;
+
+                    loopEvent.onClick = behavior.onClick;
 
                     console.log(loopEvent);
 
                     // Update the state of the event node
                     loopEvent.state = 'MOVING';
-                    device.processingInstance.loopSequence.events.push(loopEvent);
+                    device.processingInstance.loopSequence.behaviors.push(loopEvent);
                 }
 
             }
@@ -628,10 +724,10 @@ function setupGestures(device) {
         //
         // Get the touched event node, if one exists
         //
-        var eventCount = device.processingInstance.loopSequence.events.length;
+        var eventCount = device.processingInstance.loopSequence.behaviors.length;
 
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.events[i];
+            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
             if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
                 && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
 
@@ -639,26 +735,13 @@ function setupGestures(device) {
                 loopEvent.state = 'MOVING';
                 disableEventCreate = true;
 
+                // Invoke behavior's "on click" behavior.
+                loopEvent.onClick();
+
                 console.log("\tevent " + i);
                 break;
             }
         }
-
-        //
-        // Check of "go" button touched
-        //
-
-        // if ((ev.gesture.center.pageX - 50 < (device.processingInstance.screenWidth / 2) && (device.processingInstance.screenWidth / 2) < ev.gesture.center.pageX + 50)
-        //     && (ev.gesture.center.pageY - 50 < (device.processingInstance.screenHeight - 100) && (device.processingInstance.screenHeight - 100) < ev.gesture.center.pageY + 50)) {
-
-        //     var sequence = device.processingInstance.getBehaviorSequence();
-
-        //     // Start the event loop if any events exist
-        //     if (sequence.length > 0) {
-        //         //console.log("go");
-        //         device.processingInstance.loopSequence.toggle(); // toggle "go" and "stop"
-        //     }
-        // }
 
         ev.gesture.preventDefault();
         ev.stopPropagation();
@@ -675,9 +758,9 @@ function setupGestures(device) {
         var touches = ev.gesture.touches;
 
         // Get the touched object, if one exists
-        var eventCount = device.processingInstance.loopSequence.events.length;
+        var eventCount = device.processingInstance.loopSequence.behaviors.length;
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.events[i];
+            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
 
             if (loopEvent.state === 'MOVING') {
 
@@ -704,14 +787,14 @@ function setupGestures(device) {
 
                     // TODO: Upload/Submit/Push/Send the update to MCU.
 
-                    // Start the event loop if any events exist
+                    // Start the event loop if any behaviors exist
                     var sequence = device.processingInstance.getBehaviorSequence();
                     if (sequence.length > 0) {
                         device.processingInstance.loopSequence.go(); // toggle "go" and "stop"
                     }
 
                     // Callback to server to update the program
-                    loopEvent.behavior(loopEvent.options);
+                    loopEvent.procedure(loopEvent.options);
 
                 } else {
 
@@ -784,7 +867,7 @@ function setupGestures(device) {
 
             // var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
 
-            // var loopEvent = new Event({
+            // var loopEvent = new Behavior({
             //     x: ev.gesture.center.pageX,
             //     y: ev.gesture.center.pageY,
             //     xTarget: nearestPosition.x,
@@ -792,7 +875,7 @@ function setupGestures(device) {
             // });
 
             // loopEvent.state = 'MOVING';
-            // device.processingInstance.loopSequence.events.push(loopEvent);
+            // device.processingInstance.loopSequence.behaviors.push(loopEvent);
         }
 
         ev.gesture.preventDefault();
@@ -826,34 +909,33 @@ function Device(options) {
     this.showPalette = false;
     this.font = null;
 
-    function getLooper() {
+    /**
+     * Returns the looper associated with the device.
+     */
+    this.getLooper = function getLooper() {
       return this.looper;
     }
-    this.getLooper = getLooper;
 
     /**
      * Returns the device at the specified index.
      */
-    function getDevice(index) {
+    this.getDevice = function getDevice(index) {
       return this.looper.devices[index];
     }
-    this.getDevice = getDevice;
 
     /**
      * Returns the device at the specified index.
      */
-    function getAddress() {
+    this.getAddress = function getAddress() {
       return this.address;
     }
-    this.getAddress = getAddress;
 
     /**
      * Returns the behavior of the device with the specified index.
      */
-    function getBehaviorSequence(deviceIndex) {
-      return this.looper.devices[deviceIndex].processingInstance.loopSequence.events;
+    this.getBehaviorSequence = function getBehaviorSequence(deviceIndex) {
+      return this.looper.devices[deviceIndex].processingInstance.loopSequence.behaviors;
     }
-    this.getBehaviorSequence = getBehaviorSequence;
 
     /**
      * Processing sketch code
@@ -903,22 +985,56 @@ function Device(options) {
         processing.setupBehaviorPalette = function() {
 
             // Add "default" behaviors to palette
-            processing.behaviorPalette.addBehavior(-100, 0, 'light', function(options) {
-                console.log('light on top level');
-                setPin(options);
-                // TODO: Keep track of state... has this been sent yet?
-            }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 1 });
+            processing.behaviorPalette.addBehavior({
+                type: 'light',
+                label: 'light',
 
-            processing.behaviorPalette.addBehavior(100, 0, 'time', function(options) {
-                console.log('delay top level');
-                delay(options);
-            }, { index: -1, milliseconds: 1000 });
-            
-            processing.behaviorPalette.addBehavior(0, 0, 'motion', function(options) {
-                console.log('light off top level');
+                x: -100,
+                y: 0,
 
-                setPin(options);
-            }, { index: -1, pin: 13, operation: 1, type: 0, mode: 1, value: 0 });
+                procedure: function(options) {
+                    console.log('light on top level');
+                    setPin(options);
+                    // TODO: Keep track of state... has this been sent yet?
+                },
+                options: {
+                    index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 1
+                }
+            });
+
+            processing.behaviorPalette.addBehavior({
+                type: 'time',
+                label: 'time',
+
+                x: 100,
+                y: 0,
+
+                procedure: function(options) {
+                    console.log('time on top level');
+                    delay(options);
+                    // TODO: Keep track of state... has this been sent yet?
+                },
+                options: {
+                    index: -1, milliseconds: 1000
+                }
+            });
+
+            processing.behaviorPalette.addBehavior({
+                type: 'input',
+                label: 'input',
+
+                x: 0,
+                y: 0,
+
+                procedure: function(options) {
+                    console.log('input on top level');
+                    delay(options);
+                    // TODO: Keep track of state... has this been sent yet?
+                },
+                options: {
+                    index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 0
+                }
+            });
         }
 
         /**
@@ -927,7 +1043,7 @@ function Device(options) {
         processing.setup = function() {
             processing.size(processing.screenWidth, processing.screenHeight);
 
-            this.font = processing.loadFont("http://physical.computer/DidactGothic.ttf");
+            this.font = processing.loadFont("/DidactGothic.ttf");
 
             this.setupBehaviorPalette();
         }
@@ -978,9 +1094,9 @@ function Device(options) {
 
                 processing.pushMatrix();
 
-                var eventCount = processing.loopSequence.events.length;
+                var eventCount = processing.loopSequence.behaviors.length;
                 for (var i = 0; i < eventCount; i++) {
-                    var behavior = processing.loopSequence.events[i];
+                    var behavior = processing.loopSequence.behaviors[i];
 
                     processing.updatePosition(behavior);
 
@@ -1005,7 +1121,7 @@ function Device(options) {
                         // }
                     }
 
-                    primaryFont = processing.createFont("http://physical.computer/DidactGothic.ttf", 32);
+                    primaryFont = processing.createFont("/DidactGothic.ttf", 32);
                     processing.textFont(primaryFont, 16);
                     processing.textAlign(processing.CENTER);
                     processing.fill(65, 65, 65);
@@ -1018,6 +1134,62 @@ function Device(options) {
                     //     label = 'light on';
                     // }
                     processing.text(label, behavior.x, behavior.y + 4);
+
+                    // Draw behaviors
+                    if (behavior.label === 'light') {
+
+                        //processing.ellipse(behavior.x, behavior.y, 70, 70);
+
+                        // TODO:/HACK:
+                        // Show the program counter
+                        if (behavior.state == 'SEQUENCED') {
+
+                            // Slider
+                            // Interface properties
+                            processing.fill(66, 214, 146);
+                            var angle = getAngle(behavior.x, behavior.y);
+                            var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
+                            var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
+                            // Draw interface
+                            processing.line(nearestX + 30, nearestY + 50, nearestX + 30 + 100, nearestY + 50);
+                            processing.ellipse(nearestX + 30, nearestY + 50, 20, 20);
+
+                            // Button
+                            processing.fill(66, 214, 146);
+                            var angle = getAngle(behavior.x, behavior.y);
+                            var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
+                            var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
+                            processing.ellipse(nearestX, nearestY, 40, 40);
+
+                            primaryFont = processing.createFont("/DidactGothic.ttf", 32);
+                            processing.textFont(primaryFont, 16);
+                            processing.textAlign(processing.CENTER);
+                            processing.fill(65, 65, 65);
+
+                            if (behavior.qualities.brightness === 100) {
+                                // Update visual interface
+                                processing.text("on", nearestX, nearestY + 4);
+
+                                // TODO: Perform pre-state update procedure
+
+                                // Update behavior qualities
+                                behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
+
+                                // Perform behavior
+                                //behavior.procedure(behavior.options);
+                            } else {
+                                processing.text("off", nearestX, nearestY + 4);
+
+                                // TODO: Perform pre-state update procedure
+
+                                // Update behavior qualities
+                                behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
+
+                                // Perform behavior
+                                //behavior.procedure(behavior.options);
+                            }
+                        }
+                    }
 
                     // Calculate nearest point on circle
                     //line(behavior.x, behavior.y, screenWidth / 2, screenHeight / 2);
@@ -1049,7 +1221,7 @@ function Device(options) {
                         processing.fill(66, 214, 146);
                         processing.ellipse(processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y, 80, 80);
 
-                        primaryFont = processing.createFont("http://physical.computer/DidactGothic.ttf", 32);
+                        primaryFont = processing.createFont("/DidactGothic.ttf", 32);
                         processing.textFont(primaryFont, 16);
                         processing.textAlign(processing.CENTER);
                         processing.fill(65, 65, 65);
@@ -1113,19 +1285,19 @@ function Device(options) {
             processing.updatePosition = updatePosition;
 
             /**
-             * Returns the sequence of events in the event queue.
+             * Returns the sequence of behaviors in the event queue.
              */
             function getBehaviorSequence() {
-                var eventSequence = [];
+                var behaviorSequence = [];
 
-                var eventCount = processing.loopSequence.events.length;
+                var eventCount = processing.loopSequence.behaviors.length;
 
                 // Populate array for sorting
                 for (var i = 0; i < eventCount; i++) {
-                    var loopEvent = processing.loopSequence.events[i];
+                    var loopEvent = processing.loopSequence.behaviors[i];
                     if (loopEvent.state === 'SEQUENCED') {
                         
-                        eventSequence.push({
+                        behaviorSequence.push({
                             event: loopEvent,
                             angle: processing.getAngle(loopEvent.x, loopEvent.y)
                         });
@@ -1135,28 +1307,28 @@ function Device(options) {
                 // Perform insertion sort
                 var i, j;
                 var loopEvent;
-                eventCount = eventSequence.length;
+                eventCount = behaviorSequence.length;
                 for (var i = 0; i < eventCount; i++) {
-                    loopEvent = eventSequence[i];
+                    loopEvent = behaviorSequence[i];
 
-                    for (j = i-1; j > -1 && eventSequence[j].angle > loopEvent.angle; j--) {
-                        eventSequence[j+1] = eventSequence[j];
+                    for (j = i-1; j > -1 && behaviorSequence[j].angle > loopEvent.angle; j--) {
+                        behaviorSequence[j+1] = behaviorSequence[j];
                     }
 
-                    eventSequence[j+1] = loopEvent;
+                    behaviorSequence[j+1] = loopEvent;
                 }
 
-                console.log(eventSequence);
+                console.log(behaviorSequence);
 
-                for (var i = 0; i < eventSequence.length; i++) {
-                    loopEvent = eventSequence[i];
+                for (var i = 0; i < behaviorSequence.length; i++) {
+                    loopEvent = behaviorSequence[i];
 
                     console.log(loopEvent);
 
-                    var behaviorScript = loopEvent.event.behavior;
+                    var behaviorScript = loopEvent.event.procedure;
                 }
 
-                return eventSequence;
+                return behaviorSequence;
             }
             processing.getBehaviorSequence = getBehaviorSequence;
 
@@ -1181,10 +1353,6 @@ function Device(options) {
              * Get the (x,y) point on the loop.
              */
             function getPointOnCircle(radius, originX, originY, angle) {
-                //var radius = 50;
-                //var originX = 400;
-                //var originY = 400;
-                //var angle = 40;
 
                 x = originX + radius * Math.cos(angle);
                 y = originY + radius * Math.sin(angle);

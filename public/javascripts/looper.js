@@ -151,24 +151,349 @@ function Carousel(element) {
 var carousel = new Carousel("#carousel");
 carousel.setup();
 
+/**
+ * Setup screen gesture callback functions.
+ */
+function setupGestures(device) {
+
+    var currentCanvas = '#' + device.canvas;
+
+    /**
+     * Handle "tap" events.
+     */
+    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("tap", function(ev) {
+        console.log("'tap' event!");
+
+        var touches = ev.gesture.touches;
+
+        //
+        // Get the touched event node, if one exists
+        //
+        // var eventCount = device.processing.loopSequence.behaviors.length;
+
+        // for (var i = 0; i < eventCount; i++) {
+        //     var loopBehavior = device.processing.loopSequence.behaviors[i];
+        //     if ((ev.gesture.center.pageX - 50 < loopBehavior.x && loopBehavior.x < ev.gesture.center.pageX + 50)
+        //         && (ev.gesture.center.pageY - 50 < loopBehavior.y && loopBehavior.y < ev.gesture.center.pageY + 50)) {
+
+        //         // TODO: Handle "tap" event.
+        //     }
+        // }
+
+        for (var i = 0; i < interfaces.length; i++) {
+            console.log(interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY));
+            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+                interfaces[i].events.tap();
+                break;
+            }
+        }
+    });
+
+    /**
+     * Handle "touch" events.
+     */
+    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("touch", function(ev) {
+        console.log("'touch' event!");
+
+        var touches = ev.gesture.touches;
+
+        //
+        // Check if palette option was selected
+        //
+
+
+
+        // Check for interaction with interfaces
+        console.log("INTERFACES");
+        for (var i = 0; i < interfaces.length; i++) {
+            console.log(interfaces[i]);
+            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+                interfaces[i].events.touch();
+                break;
+            }
+        }
+
+        // var behaviorPalette = device.processing.behaviorPalette;
+
+        // if (behaviorPalette.visible) {
+
+        //     var behaviorCount = device.processing.behaviorPalette.behaviors.length;
+        //     for(var i = 0; i < behaviorCount; i++) {
+        //         var behavior = device.processing.behaviorPalette.behaviors[i];
+
+        //         console.log('behavior:')
+        //         console.log(behavior);
+
+        //         // Check if palette option is touched
+        //         if ((ev.gesture.center.pageX - 50 < behaviorPalette.x + behavior.x && behaviorPalette.x + behavior.x < ev.gesture.center.pageX + 50)
+        //             && (ev.gesture.center.pageY - 50 < behaviorPalette.y + behavior.y && behaviorPalette.y + behavior.y < ev.gesture.center.pageY + 50)) {
+
+        //             // Hide the behavior palette
+        //             device.processing.behaviorPalette.visible = false;
+
+        //             // Create behavior node
+        //             var nearestPosition = device.processing.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
+
+        //             var loopBehavior = new Behavior({
+        //                 x: device.processing.behaviorPalette.x + behavior.x,
+        //                 y: device.processing.behaviorPalette.y + behavior.y,
+        //                 xTarget: nearestPosition.x,
+        //                 yTarget: nearestPosition.y
+        //             });
+        //             // loopBehavior.attachInterface({
+        //             //     processing: device.processing,
+        //             //     touches: function(x, y) {
+        //             //         return true;
+        //             //     },
+        //             //     // draw: {
+
+        //             //     // },
+        //             //     events: {
+        //             //         tap: function() {
+
+        //             //         },
+        //             //         touch: function() {
+        //             //             //loopBehavior.visible = false;
+        //             //             loopBehavior.state = 'MOVING';
+        //             //             disableEventCreate = true;
+
+        //             //             // Invoke behavior's "on click" behavior.
+        //             //             loopBehavior.onClick();
+
+        //             //             console.log("\teventED!!");
+        //             //         },
+        //             //         hold: function() {
+
+        //             //         },
+        //             //         release: function() {
+
+        //             //         }
+        //             //     }
+        //             // });
+
+        //             // Update for selected behavior
+        //             loopBehavior.label = behavior.label;
+        //             loopBehavior.procedure = behavior.procedure;
+        //             loopBehavior.options = behavior.options;
+
+        //             loopBehavior.qualities = behavior.qualities;
+
+        //             loopBehavior.onClick = behavior.onClick;
+
+        //             console.log(loopBehavior);
+
+        //             // Update the state of the event node
+        //             loopBehavior.state = 'MOVING';
+        //             device.processing.loopSequence.behaviors.push(loopBehavior);
+        //         }
+
+        //     }
+        // }
+
+        //
+        // Get the touched event node, if one exists
+        //
+        // var eventCount = device.processing.loopSequence.behaviors.length;
+
+        // for (var i = 0; i < eventCount; i++) {
+        //     var loopBehavior = device.processing.loopSequence.behaviors[i];
+        //     if ((ev.gesture.center.pageX - 50 < loopBehavior.x && loopBehavior.x < ev.gesture.center.pageX + 50)
+        //         && (ev.gesture.center.pageY - 50 < loopBehavior.y && loopBehavior.y < ev.gesture.center.pageY + 50)) {
+
+        //         //loopBehavior.visible = false;
+        //         loopBehavior.state = 'MOVING';
+        //         disableEventCreate = true;
+
+        //         // Invoke behavior's "on click" behavior.
+        //         loopBehavior.onClick();
+
+        //         console.log("\tevent " + i);
+        //         break;
+        //     }
+        // }
+
+        // // Check for interaction with interfaces
+        // for (var i = 0; i < interfaces.length; i++) {
+        //     console.log(interfaces[i]);
+        //     if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+        //         interfaces[i].events.touch();
+        //         break;
+        //     }
+        // }
+
+        ev.gesture.preventDefault();
+        ev.stopPropagation();
+        ev.gesture.stopPropagation();
+        return;
+    });
+
+    /**
+     * Detect "release" event.
+     */
+    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("release", function(ev) {
+        console.log("'release' event!");
+
+        var touches = ev.gesture.touches;
+
+        for (var i = 0; i < interfaces.length; i++) {
+            console.log(interfaces[i]);
+            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+                interfaces[i].events.release();
+                break;
+            }
+        }
+
+        // Get the touched object, if one exists
+        // var eventCount = device.processing.loopSequence.behaviors.length;
+        // for (var i = 0; i < eventCount; i++) {
+        //     var loopBehavior = device.processing.loopSequence.behaviors[i];
+
+        //     if (loopBehavior.state === 'MOVING') {
+
+        //         // deltaX = ev.gesture.center.pageX - (screenWidth / 2);
+        //         // deltaY = ev.gesture.center.pageY - (screenHeight / 2);
+        //         // //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
+        //         // angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+
+        //         // x = screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+        //         // y = screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+
+        //         var distance = device.processing.getDistanceFromEventLoop(loopBehavior);
+
+        //         if (distance < 110) {
+
+        //             // Update position of the event node and set as "sequenced"
+        //             var nearestPosition = device.processing.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
+        //             loopBehavior.x = nearestPosition.x;
+        //             loopBehavior.y = nearestPosition.y;
+        //             loopBehavior.state = 'SEQUENCED';
+
+        //             // Update loop ordering
+        //             // device.processing.loopSequence.updateOrdering();
+
+        //             // TODO: Upload/Submit/Push/Send the update to MCU.
+
+        //             // Start the event loop if any behaviors exist
+        //             var sequence = device.processing.getBehaviorSequence();
+        //             if (sequence.length > 0) {
+        //                 device.processing.loopSequence.go(); // toggle "go" and "stop"
+        //             }
+
+        //             // Callback to server to update the program
+        //             loopBehavior.procedure(loopBehavior.options);
+
+        //         } else {
+
+        //             // TODO: Remove behavior from the behavior loop!
+
+        //             console.log("DELETING");
+
+        //             // Update position of the event node and set as "floating"
+        //             loopBehavior.state = 'FLOATING';
+
+        //             console.log("Deleting " + loopBehavior.options.index);
+
+        //             deleteBehavior({ index: loopBehavior.options.index });
+
+        //             // Update loop ordering
+        //             // device.processing.loopSequence.updateOrdering();
+
+        //             // Stop the event loop if no nodes are placed on it
+        //             var sequence = device.processing.getBehaviorSequence();
+        //             if (sequence.length == 0) {
+        //                 device.processing.loopSequence.stop();
+        //             } else {
+        //                 device.processing.loopSequence.go(); // toggle "go" and "stop"
+        //             }
+
+        //             // Push the behavior change to the server
+        //             // TODO: Remove the behavior from the program
+        //         }
+
+        //         // TODO: Deploy behavior to device (via HTTP requests).
+
+        //         disableEventCreate = false;
+
+        //         break;
+        //     }
+        // }
+
+        // disableEventCreate = false;
+
+        // ev.gesture.preventDefault();
+        // ev.stopPropagation();
+        // ev.gesture.stopPropagation();
+        // return;
+    });
+
+    /**
+     * Handle "hold" touch event.
+     */
+    $(currentCanvas).hammer({ drag_max_touches: 0, hold_timeout: 200 }).on("hold", function(ev) {
+        console.log("'hold' event!");
+
+        for (var i = 0; i < interfaces.length; i++) {
+            console.log(interfaces[i]);
+            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+                interfaces[i].events.release();
+                break;
+            }
+        }
+
+        if (!disableEventCreate) {
+            disableEventCreate = true;
+
+            var touches = ev.gesture.touches;
+
+            // deltaX = ev.gesture.center.pageX - (screenWidth / 2);
+            // deltaY = ev.gesture.center.pageY - (screenHeight / 2);
+            // //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
+            // angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+
+            // x = screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+            // y = screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+
+            // var nearestPosition = device.processing.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
+
+            if (device.processing.behaviorPalette == null) {
+                console.log("looperInstance = ");
+                console.log(device.processing.looperInstance);
+                device.processing.behaviorPalette = new BehaviorPalette({ looperInstance: device });
+                device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+                device.processing.behaviorPalette.updatePosition();
+                device.processing.setupBehaviorPalette();
+                console.log(device.processing.behaviorPalette);
+            }
+
+            // Show behavior palette
+            // device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+            device.processing.behaviorPalette.show();
+            console.log(device.processing.behaviorPalette);
+            // device.processing.behaviorPalette.interface.draw();
+
+            // var nearestPosition = device.processing.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
+
+            // var loopBehavior = new Behavior({
+            //     x: ev.gesture.center.pageX,
+            //     y: ev.gesture.center.pageY,
+            //     xTarget: nearestPosition.x,
+            //     yTarget: nearestPosition.y
+            // });
+
+            // loopBehavior.state = 'MOVING';
+            // device.processing.loopSequence.behaviors.push(loopBehavior);
+        }
+
+        ev.gesture.preventDefault();
+        ev.stopPropagation();
+        ev.gesture.stopPropagation();
+        return;
+    });
+}
+
 //------------
 // looper.js
 //------------
-
-function BehaviorControl(options) {
-    var defaults = {
-        type: 'none',
-        xOffset: 0,
-        yOffset: 0,
-
-        events: {}, // Event handlers for interaction (i.e., tap, touch, hold, swipe, etc.)
-        draw: null, // Function to draw the control interface
-
-        visible: true
-    };
-    var options = options || {};
-    var options = $.extend({}, defaults, options);
-}
 
 /**
  * The main Looper class.
@@ -190,7 +515,7 @@ function Looper(options) {
     /**
      * Add a device to the list of devices in the mesh network.
      */
-    function addDevice(options) {
+    this.addDevice = function(options) {
         var defaults = {
             address: null
         };
@@ -212,7 +537,7 @@ function Looper(options) {
         canvas = "canvas" + deviceCount;
 
         // Create device object
-        var device = new Device({ canvas: canvas, address: options['address'] });
+        var device = new LooperInstance({ canvas: canvas, address: options['address'] });
         device.looper = this;
         device.index = deviceCount; // TODO: Replace with node/node UUID
         setupGestures(device);
@@ -227,41 +552,35 @@ function Looper(options) {
 
         $('#overlay' + deviceCount).hide();
     }
-    this.addDevice = addDevice;
 
     /**
      * Returns the device at the specified index.
      */
-    function getDevice(index) {
-        this.devices[index];
+    this.getDevice = function(index) {
+        return this.devices[index];
     }
-    this.getDevice = getDevice;
 
     /**
      * Returns the device at the specified index.
      */
-    // function getCurrentDevice() {
-    //     this.devices[this.getCurrentPane];
-    // }
-    // this.getCurrentDevice = getCurrentDevice;
+    this.getCurrentDevice = function() {
+        return this.devices[this.getCurrentPane];
+    }
 
     /**
      * Returns the current device's address.
      */
-    // function getCurrentDeviceAddress() {
-    //     this.devices[this.getCurrentPane()].address;
-    // }
-    // this.getCurrentDeviceAddress = getCurrentDeviceAddress;
+    this.getCurrentDeviceAddress = function() {
+        return this.devices[this.getCurrentPane()].address;
+    }
 
-    function showDeviceByIndex(index) {
+    this.showDeviceByIndex = function(index) {
         this.carousel.showPane(index + 1);
     }
-    this.showDeviceByIndex = showDeviceByIndex;
 
-    function getCurrentPane() {
+    this.getCurrentPane = function() {
         return this.carousel.getCurrentPane() - 1;
     }
-    this.getCurrentPane = getCurrentPane;
 }
 
 function Loop(options) {
@@ -324,35 +643,35 @@ function Loop(options) {
 
         // Populate array for sorting
         for (var i = 0; i < eventCount; i++) {
-            var loopEvent = this.behaviors[i];
-            if (loopEvent.state === 'SEQUENCED') {
+            var loopBehavior = this.behaviors[i];
+            if (loopBehavior.state === 'SEQUENCED') {
                 behaviorSequence.push({
-                    event: loopEvent,
-                    angle: getAngle(loopEvent.x, loopEvent.y)
+                    event: loopBehavior,
+                    angle: getAngle(loopBehavior.x, loopBehavior.y)
                 });
             }
         }
 
         // Perform insertion sort
         var i, j;
-        var loopEvent;
+        var loopBehavior;
         eventCount = behaviorSequence.length;
         for (var i = 0; i < eventCount; i++) {
-            loopEvent = behaviorSequence[i];
+            loopBehavior = behaviorSequence[i];
 
-            for (j = i-1; j > -1 && behaviorSequence[j].angle > loopEvent.angle; j--) {
+            for (j = i-1; j > -1 && behaviorSequence[j].angle > loopBehavior.angle; j--) {
                 behaviorSequence[j+1] = behaviorSequence[j];
             }
 
-            behaviorSequence[j+1] = loopEvent;
+            behaviorSequence[j+1] = loopBehavior;
         }
 
         // Update the sequence to the sorted list of behaviors
         var updatedEventLoop = [];
         for (var i = 0; i < behaviorSequence.length; i++) {
-            loopEvent = behaviorSequence[i];
-            loopEvent.event.options.index = i; // HACK: Update the behavior's index in the loop
-            updatedEventLoop.push(loopEvent.event);
+            loopBehavior = behaviorSequence[i];
+            loopBehavior.event.options.index = i; // HACK: Update the behavior's index in the loop
+            updatedEventLoop.push(loopBehavior.event);
         }
 
         this.behaviors = updatedEventLoop;
@@ -381,15 +700,18 @@ function Behavior(options) {
         y: null,
         xTarget: null,
         yTarget: null,
-        state: 'INVALID', // INVALID, FLOATING, MOVING, ENTANGLED, SEQUENCED
+        state: 'PROTOTYPE', // NONE, PROTOTYPE, FLOATING, MOVING, ENTANGLED, SEQUENCED
         //visible: true
-        behavior: null,
+        procedure: null,
         options: {},
         going: false,
         label: '?'
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
+
+    this.procedure = options.procedure;
+    this.options = options.options;
 
     this.x = options.x;
     this.y = options.y;
@@ -415,71 +737,129 @@ function Behavior(options) {
         this.going = false;
     }
     this.stop = stop;
+
+
+
+    this.attachInterface = function(options) {
+
+        // Attach the specified interface to the specified object
+        this.interface = new Interface(options);
+    }
 }
 
-// Add "default" behaviors to palette
-/*
-processing.behaviorPalette.addBehavior(-100, 0, 'light', function(options) {
-    console.log('light on top level');
-    setPin(options);
-    // TODO: Keep track of state... has this been sent yet?
-}, { index: -1, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
-*/
-function BehaviorPrototype(options) {
+interfaces = []; // TODO: Move this into Looper class?
+function Interface(options) {
     var defaults = {
-        x: null,
-        y: null,
-        xTarget: null,
-        yTarget: null,
-        // state: 'INVALID', // INVALID, FLOATING, MOVING, ENTANGLED, SEQUENCED
-        //visible: true
-        // go: null,
-        // going: false,
+        parent: null,
         type: 'none',
-        label: '?',
-        visible: false,
-        procedure: null, // The "template procedure" that describes how to do the behavior.
-        options: {}
+        x: 100,
+        y: 100,
+        xOffset: 0,
+        yOffset: 0,
+        xTarget: 0,
+        yTarget: 0,
+
+        events: {}, // Event handlers for interaction (i.e., tap, touch, hold, swipe, etc.)
+        draw: null, // Function to draw the control interface
+
+        visible: true,
+
+        processing: null
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
 
+    this.parent = options.parent;
+
     this.x = options.x;
     this.y = options.y;
-
+    this.xOffset = options.xOffset;
+    this.yOffset = options.yOffset;
     this.xTarget = options.xTarget;
     this.yTarget = options.yTarget;
 
-    this.type = options.type; // The type of behavior. This is a unique type identifier.
-    this.label = options.label; // The "printable name" for the behavior.
+    this.processing = options.processing;
+    this.events = options.events;
+    this.draw = options.draw;
+    this.touches = options.touches;
 
-    this.visible = options.visible;
-
-    this.procedure = options.procedure;
-    this.options = options.options;
-
-    function setPosition(x, y) {
+    this.setPosition = function(x, y) {
         this.xTarget = x;
         this.yTarget = y;
     }
-    this.setPosition = setPosition;
 
-    function updatePosition() {
+    this.updatePosition = function() {
         this.x = this.xTarget;
         this.y = this.yTarget;
     }
-    this.updatePosition = updatePosition;
 
-    function show() {
+    this.show = function() {
         this.visible = true;
     }
-    this.show = show;
 
-    function hide() {
+    this.hide = function() {
         this.visible = false;
     }
-    this.hide = hide;
+
+    // Add interface to list of interfaces
+    interfaces.push(this);
 }
+
+// function BehaviorPrototype(options) {
+//     var defaults = {
+//         x: null,
+//         y: null,
+//         xTarget: null,
+//         yTarget: null,
+//         // state: 'NONE', // NONE, FLOATING, MOVING, ENTANGLED, SEQUENCED
+//         //visible: true
+//         // go: null,
+//         // going: false,
+//         type: 'none',
+//         label: '?',
+//         visible: false,
+//         procedure: null, // The "template procedure" that describes how to do the behavior.
+//         options: {}
+//     };
+//     var options = options || {};
+//     var options = $.extend({}, defaults, options);
+
+//     this.x = options.x;
+//     this.y = options.y;
+
+//     this.xTarget = options.xTarget;
+//     this.yTarget = options.yTarget;
+
+//     this.type = options.type; // The type of behavior. This is a unique type identifier.
+//     this.label = options.label; // The "printable name" for the behavior.
+
+//     this.visible = options.visible;
+
+//     this.procedure = options.procedure;
+//     this.options = options.options;
+
+//     function setPosition(x, y) {
+//         this.xTarget = x;
+//         this.yTarget = y;
+//     }
+//     this.setPosition = setPosition;
+
+//     function updatePosition() {
+//         this.x = this.xTarget;
+//         this.y = this.yTarget;
+//     }
+//     this.updatePosition = updatePosition;
+
+//     function show() {
+//         this.visible = true;
+//     }
+//     this.show = show;
+
+//     function hide() {
+//         this.visible = false;
+//     }
+//     this.hide = hide;
+// }
 
 // NOTE: The following is one way to do inheritance.
 //
@@ -499,18 +879,14 @@ function BehaviorPrototype(options) {
 //     return "LightBehavior";
 // }
 
-
-
-
-
-
 function BehaviorPalette(options) {
     var defaults = {
+        looperInstance: null,
         x: null,
         y: null,
         xTarget: null,
         yTarget: null,
-        // state: 'INVALID', // INVALID, FLOATING, MOVING, ENTANGLED, SEQUENCED
+        // state: 'NONE', // NONE, FLOATING, MOVING, ENTANGLED, SEQUENCED
         //visible: true
         // go: null,
         // going: false,
@@ -520,6 +896,8 @@ function BehaviorPalette(options) {
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
+
+    this.looperInstance = options.looperInstance;
 
     this.x = options.x;
     this.y = options.y;
@@ -563,6 +941,9 @@ function BehaviorPalette(options) {
     }
     this.hide = hide;
 
+    console.log("!!!!!");
+    console.log(this.looperInstance);
+
     /**
      * Adds a behavior node to the behavior palette
      */
@@ -580,8 +961,11 @@ function BehaviorPalette(options) {
         var options = options || {};
         var options = $.extend({}, defaults, options);
 
+        console.log("ADDING BEHAVIOR");
+        console.log(options);
+
         // Construct the behavior
-        var behavior = new BehaviorPrototype({
+        var behavior = new Behavior({
             x: options.x, // was ev.gesture.center.pageX,
             y: options.y, // was ev.gesture.center.pageY,
             xTarget: options.x,
@@ -590,313 +974,425 @@ function BehaviorPalette(options) {
             type: options.type,
             label: options.label,
 
+            state: 'PROTOTYPE', // Set state to prototype (i.e., showing up in the palette, still a "template")
+
             procedure: options.procedure,
             options: options.options,
 
-            qualities: {}  // The "character" of the behavior based on it's type.
+            // TODO: Remove 'qualities'. Instead, make 'state' an object that can have multiple properties.
+            //qualities: {}  // The "character" of the behavior based on it's type.
+            qualities: options.qualities
         });
+
+        // Attach Interface to behavior
+        behavior.attachInterface({
+
+            parent: behavior,
+
+            processing: this.looperInstance.processing,
+
+            x: options.x, // was ev.gesture.center.pageX,
+            y: options.y, // was ev.gesture.center.pageY,
+            xTarget: options.x,
+            yTarget: options.y,
+
+            touches: function(x, y) {
+                var radius = 50;
+                console.log(x, y, this.x, this.y);
+                if ((this.x - radius < x && this.x + radius > x) && (this.y - radius < y && this.y + radius > y)) {
+                // if ((x - radius < this.processing.behaviorPalette.x + this.x && this.processing.behaviorPalette.x + this.x < x + radius)
+                //     && (y - radius < this.processing.behaviorPalette.y + this.y && this.processing.behaviorPalette.y + this.y < y + radius)) {
+
+                    return true;
+                }
+
+                return false;
+            },
+
+            draw: function() {
+
+                // if (this.processing.behaviorPalette.visible) {
+                if (behavior.state === 'PROTOTYPE') {
+
+                    //this.processing.behaviorPalette.updatePosition();
+                    // this.processing.updatePosition(behavior);
+
+                    this.processing.pushMatrix();
+
+                    // Draw the behavior
+                    this.processing.fill(66, 214, 146);
+                    this.processing.ellipse(this.x, this.y, 80, 80);
+
+                    primaryFont = this.processing.createFont("/DidactGothic.ttf", 32);
+                    this.processing.textFont(primaryFont, 16);
+                    this.processing.textAlign(this.processing.CENTER);
+                    this.processing.fill(65, 65, 65);
+                    this.processing.text(behavior.label, this.x, this.y + 4);
+
+                    this.processing.popMatrix();
+
+                } else if (behavior.state === 'FLOATING') {
+
+                    this.processing.fill(66, 214, 146, 50);
+                    this.processing.ellipse(behavior.interface.x, behavior.interface.y, 70, 70);
+
+                } else {
+
+                    this.processing.pushMatrix();
+
+                    if (behavior.state === 'MOVING') {
+
+                        // Standard update for a moving event
+                        currentMouseX = behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX;
+                        behavior.interface.x = currentMouseX;
+                        behavior.interface.y = behavior.interface.processing.mouseY;
+
+                        deltaX = currentMouseX - (behavior.interface.processing.screenWidth / 2);
+                        deltaY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
+                        angleInDegrees = Math.atan2(deltaY, deltaX);
+
+                        behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                        behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+
+                        // this.processing.behaviorPalette.updatePosition();
+                        // this.processing.updatePosition(behavior);
+
+                        // Check if under certain distance from the circle (and attach to)
+                        var distance = this.processing.lineDistance(this.x, this.y, this.xTarget, this.yTarget);
+
+                        console.log("distance = ");
+                        console.log(distance);
+
+                        if (distance < 110) { // ENTANGLED
+                            this.processing.line(this.x, this.y, this.xTarget, this.yTarget);
+
+                            // Draw the "would be" position that the event node would occupy
+                            this.processing.fill(66, 214, 146, 50);
+                            this.processing.ellipse(behavior.interface.xTarget, behavior.interface.yTarget, 50, 50);
+
+                            // Snap to event loop
+                            if (!disableEventCreate) {
+                                deltaX = this.processing.mouseX - (this.processing.screenWidth / 2);
+                                deltaY = this.processing.mouseY - (this.processing.screenHeight / 2);
+                                //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
+                                angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+
+                                // behavior.interface.x = this.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                                // behavior.interface.y = this.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+                                behavior.interface.x = this.xTarget;
+                                behavior.interface.y = this.yTarget;
+                            }
+                        }
+                    }
+
+                    // Draw the behavior
+                    this.processing.fill(66, 214, 146);
+                    this.processing.ellipse(this.x, this.y, 80, 80);
+
+                    primaryFont = this.processing.createFont("/DidactGothic.ttf", 32);
+                    this.processing.textFont(primaryFont, 16);
+                    this.processing.textAlign(this.processing.CENTER);
+                    this.processing.fill(65, 65, 65);
+                    this.processing.text(behavior.label, this.x, this.y + 4);
+
+                    this.processing.popMatrix();
+
+                }
+
+
+
+                    // processing.updatePosition(behavior);
+
+                    // // Draw the event node
+                    // processing.fill(66, 214, 146);
+                    // if (behavior.going) {
+                    //     processing.ellipse(behavior.x, behavior.y, 70, 70);
+
+                    //     // Show the program counter
+                    //     if (behavior.state == 'SEQUENCED') {
+                    //         var angle = getAngle(behavior.x, behavior.y);
+                    //         var nearestX = processing.screenWidth / 2 + (500 / 2) * Math.cos(angle - Math.PI  / 2);
+                    //         var nearestY = processing.screenHeight / 2 + (500 / 2) * Math.sin(angle - Math.PI  / 2);
+                    //         processing.ellipse(nearestX, nearestY, 20, 20);
+                    //     }
+                    // } else {
+                    //     processing.ellipse(behavior.x, behavior.y, 70, 70);
+
+                    //     // // Draw options for the sequenced node
+                    //     // if (behavior.state == 'SEQUENCED') {
+                    //     //     processing.ellipse(behavior.x + 40, behavior.y - 40, 30, 30);
+                    //     // }
+                    // }
+            },
+
+            events: {
+                tap: function() {
+                    console.log("tap Behavior");
+                },
+
+                touch: function() {
+                    console.log("touch Behavior");
+
+                    disableEventCreate = true;
+
+                //     //loopBehavior.visible = false;
+                // loopBehavior.state = 'MOVING';
+                // disableEventCreate = true;
+
+                // // Invoke behavior's "on click" behavior.
+                // loopBehavior.onClick();
+
+                // console.log("\tevent " + i);
+
+                    if (behavior.state === 'PROTOTYPE') {
+
+                        // console.log("touched PROTOTYPE Behavior. Setting to MOVING.");
+                        behavior.state = 'MOVING';
+
+                        // Hide the behavior palette
+                        behavior.interface.processing.behaviorPalette.visible = false;
+
+                        behavior.interface.processing.loopSequence.behaviors.push(behavior);
+
+                    } else if (behavior.state === 'FLOATING') {
+
+                        behavior.state = 'MOVING';
+
+                    } else if (behavior.state === 'SEQUENCED') {
+
+                        behavior.state = 'MOVING';
+
+                    }
+
+                    if (behavior.state === 'MOVING') {
+
+                        var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop(behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
+                        
+                        behavior.interface.xTarget = nearestPosition.x;
+                        behavior.interface.yTarget = nearestPosition.y;
+
+                        // behavior.interface.processing.updatePosition(behavior);
+
+                        // // Standard update for a moving event
+                        // currentMouseX = behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX;
+                        // behavior.interface.x = currentMouseX;
+                        // behavior.interface.y = behavior.interface.processing.mouseY;
+
+                        // deltaX = currentMouseX - (behavior.interface.processing.screenWidth / 2);
+                        // deltaY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
+                        // angleInDegrees = Math.atan2(deltaY, deltaX);
+
+                        // behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                        // behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+
+                        // behavior.state = 'MOVING';
+
+                    }
+                },
+
+                hold: function() {
+                    console.log("hold Behavior");
+                },
+
+                release: function() {
+                    console.log("release Behavior");
+                    console.log(behavior);
+
+                    if (behavior.state === 'PROTOTYPE') {
+
+                        console.log("RELEASING PROTOTYPE!");
+                        // behavior.state = 'MOVING';
+                        console.log(behavior.state);
+
+                    }
+
+                    if (behavior.state === 'MOVING') {
+
+                        // deltaX = ev.gesture.center.pageX - (screenWidth / 2);
+                        // deltaY = ev.gesture.center.pageY - (screenHeight / 2);
+                        // //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
+                        // angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+
+                        // x = screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                        // y = screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+
+                        console.log("MOVING PROTOTYPE!");
+                        console.log(behavior);
+                        console.log(behavior.interface.processing);
+                        var distance = behavior.interface.processing.getDistanceFromEventLoop(behavior.interface);
+                        console.log(distance);
+
+                        if (distance < 110) {
+
+                            // Update position of the event node and set as "sequenced"
+                            //var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop(behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
+                            //var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop(behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
+                            // behavior.interface.x = nearestPosition.x;
+                            // behavior.interface.y = nearestPosition.y;
+                            behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                            behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+                            behavior.interface.x = behavior.interface.xTarget;
+                            behavior.interface.y = behavior.interface.yTarget;
+                            behavior.state = 'SEQUENCED';
+
+                            // Update loop ordering
+                            // device.processing.loopSequence.updateOrdering();
+
+                            // TODO: Upload/Submit/Push/Send the update to MCU.
+
+                            // Start the event loop if any behaviors exist
+                            var sequence = behavior.interface.processing.getBehaviorSequence();
+                            if (sequence.length > 0) {
+                                behavior.interface.processing.loopSequence.go(); // toggle "go" and "stop"
+                            }
+
+                            // Callback to server to update the program
+                            console.log(behavior);
+                            behavior.procedure(behavior.options);
+
+                        } else {
+
+                            // TODO: Remove behavior from the behavior loop!
+
+                            console.log("DELETING");
+
+                            // Update position of the event node and set as "floating"
+                            behavior.state = 'FLOATING';
+
+                            console.log(behavior);
+
+                            console.log("Deleting " + behavior.options.index);
+
+                            deleteBehavior({ index: behavior.options.index });
+
+                            // Update loop ordering
+                            // device.processing.loopSequence.updateOrdering();
+
+                            // Stop the event loop if no nodes are placed on it
+                            var sequence = behavior.interface.processing.getBehaviorSequence();
+                            if (sequence.length == 0) {
+                                behavior.interface.processing.loopSequence.stop();
+                            } else {
+                                behavior.interface.processing.loopSequence.go(); // toggle "go" and "stop"
+                            }
+
+                            // Push the behavior change to the server
+                            // TODO: Remove the behavior from the program
+                        }
+
+                        // TODO: Deploy behavior to device (via HTTP requests).
+
+                        disableEventCreate = false;
+
+                        if (!disableEventCreate) {
+                            if (behavior.interface.processing.behaviorPalette != null) {
+
+                                // var behaviorCount = behavior.interface.processing.behaviorPalette.behaviors.length;
+                                // // var behaviorCount = behavior.interface.processing.loopSequence.behaviors.length;
+                                // console.log("behaviorCount = " + behaviorCount);
+                                // for (var i = 0; i < behaviorCount; ) {
+
+                                //     console.log(behavior.interface.processing.behaviorPalette.behaviors[i].state);
+
+                                //     if (behavior.interface.processing.behaviorPalette.behaviors[i].state === 'PROTOTYPE') {
+                                //         behavior.interface.processing.behaviorPalette.behaviors.splice(i, 1);
+                                //         behaviorCount--;
+                                //         console.log("removing...");
+                                //         continue;                                
+                                //     }
+
+                                //     i++;
+                                // }
+
+                                // Remove interfaces associated with the removed behaviors
+                                var interfaceCount = interfaces.length;
+                                // var interfaceCount = behavior.interface.processing.loopSequence.behaviors.length;
+                                console.log("interfaceCount = " + interfaceCount);
+                                for (var i = 0; i < interfaceCount; ) {
+
+                                    console.log(interfaces[i]);
+
+                                    if (interfaces[i].parent.state === 'PROTOTYPE') {
+                                        interfaces.splice(i, 1);
+                                        interfaceCount--;
+                                        console.log("removing...");
+                                        continue;                                
+                                    }
+
+                                    i++;
+                                }
+
+                                // Destroy behavior palette!
+                                behavior.interface.processing.behaviorPalette = null;
+                            }
+                        }
+
+                        // break;
+                    }
+                }
+            }
+        });
+
+
 
         // Specialize the standard behavior constructed above
         // IDEA: Add "behavior.history" to store the history of states (or maybe the state transformations)
-        if (behavior.type === 'light') {
-            // behavior.qualities = {}; // Add the "character" or characteristic qualities of the behavior based on it's type.
-            behavior.qualities = {
-                brightness: 0
-            };
+        // if (behavior.type === 'light') {
+        //     // behavior.qualities = {}; // Add the "character" or characteristic qualities of the behavior based on it's type.
+        //     behavior.qualities = {
+        //         brightness: 0
+        //     };
 
-            behavior.setBrightness = function(options) {
-                var defaults = {
-                    brightness: 100
-                };
-                var options = options || {};
-                var options = $.extend({}, defaults, options);
+        //     behavior.setBrightness = function(options) {
+        //         var defaults = {
+        //             brightness: 100
+        //         };
+        //         var options = options || {};
+        //         var options = $.extend({}, defaults, options);
 
-                // Change the brightness
-                this.qualities.brightness = options['brightness'];
-            }
+        //         // Change the brightness
+        //         this.qualities.brightness = options['brightness'];
+        //     }
 
-            behavior.onClick = function() {
-                if (this.qualities.brightness > 0) {
-                    this.qualities.brightness = 0;
-                    console.log("off");
+        //     behavior.onClick = function() {
+        //         if (this.qualities.brightness > 0) {
+        //             this.qualities.brightness = 0;
+        //             console.log("off");
 
-                    // Perform behavior
-                    //behavior.procedure(behavior.options);
-                    updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 0 });
-                } else {
-                    this.qualities.brightness = 100;
-                    console.log("on");
+        //             // Perform behavior
+        //             //behavior.procedure(behavior.options);
+        //             updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 0 });
+        //         } else {
+        //             this.qualities.brightness = 100;
+        //             console.log("on");
 
-                    // Perform behavior
-                    //behavior.procedure(behavior.options);
-                    updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
-                }
-            }
-        }
+        //             // Perform behavior
+        //             //behavior.procedure(behavior.options);
+        //             updateBehavior({ index: 0, pin: 5, operation: 1, type: 0, mode: 1, value: 1 });
+        //         }
+        //     }
+        // }
 
         console.log(behavior);
         
         this.behaviors.push(behavior); // Add the behavior to the loop.
     }
-}
 
-/**
- * Setup screen gesture callback functions.
- */
-function setupGestures(device) {
+    // this.attachInterface = function(options) {
 
-    var currentCanvas = '#' + device.canvas;
+    //     console.log("FANGS! FANGS! FANGS! FANGS! FANGS!");
 
-    /**
-     * Handle "tap" events.
-     */
-    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("tap", function(ev) {
-        console.log("'tap' event!");
+    //     // Attach the specified interface to the specified object
+    //     this.interface = new Interface(options);
 
-        var touches = ev.gesture.touches;
-
-        //
-        // Get the touched event node, if one exists
-        //
-        var eventCount = device.processingInstance.loopSequence.behaviors.length;
-
-        for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
-            if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
-                && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
-
-                // TODO: Handle "tap" event.
-            }
-        }
-    });
-
-    /**
-     * Handle "touch" events.
-     */
-    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("touch", function(ev) {
-        console.log("'touch' event!");
-
-        var touches = ev.gesture.touches;
-
-        //
-        // Check if palette option was selected
-        //
-
-        var behaviorPalette = device.processingInstance.behaviorPalette;
-
-        if (behaviorPalette.visible) {
-
-            var behaviorCount = device.processingInstance.behaviorPalette.behaviors.length;
-            for(var i = 0; i < behaviorCount; i++) {
-                var behavior = device.processingInstance.behaviorPalette.behaviors[i];
-
-                console.log('behavior:')
-                console.log(behavior);
-
-                // Check if palette option is touched
-                if ((ev.gesture.center.pageX - 50 < behaviorPalette.x + behavior.x && behaviorPalette.x + behavior.x < ev.gesture.center.pageX + 50)
-                    && (ev.gesture.center.pageY - 50 < behaviorPalette.y + behavior.y && behaviorPalette.y + behavior.y < ev.gesture.center.pageY + 50)) {
-
-                    // Hide the behavior palette
-                    device.processingInstance.behaviorPalette.visible = false;
-
-                    // Create behavior node
-                    var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
-
-                    var loopEvent = new Behavior({
-                        x: device.processingInstance.behaviorPalette.x + behavior.x,
-                        y: device.processingInstance.behaviorPalette.y + behavior.y,
-                        xTarget: nearestPosition.x,
-                        yTarget: nearestPosition.y
-                    });
-
-                    // Update for selected behavior
-                    loopEvent.label = behavior.label;
-                    loopEvent.procedure = behavior.procedure;
-                    loopEvent.options = behavior.options;
-
-                    loopEvent.qualities = behavior.qualities;
-
-                    loopEvent.onClick = behavior.onClick;
-
-                    console.log(loopEvent);
-
-                    // Update the state of the event node
-                    loopEvent.state = 'MOVING';
-                    device.processingInstance.loopSequence.behaviors.push(loopEvent);
-                }
-
-            }
-        }
-
-        //
-        // Get the touched event node, if one exists
-        //
-        var eventCount = device.processingInstance.loopSequence.behaviors.length;
-
-        for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
-            if ((ev.gesture.center.pageX - 50 < loopEvent.x && loopEvent.x < ev.gesture.center.pageX + 50)
-                && (ev.gesture.center.pageY - 50 < loopEvent.y && loopEvent.y < ev.gesture.center.pageY + 50)) {
-
-                //loopEvent.visible = false;
-                loopEvent.state = 'MOVING';
-                disableEventCreate = true;
-
-                // Invoke behavior's "on click" behavior.
-                loopEvent.onClick();
-
-                console.log("\tevent " + i);
-                break;
-            }
-        }
-
-        ev.gesture.preventDefault();
-        ev.stopPropagation();
-        ev.gesture.stopPropagation();
-        return;
-    });
-
-    /**
-     * Detect "release" event.
-     */
-    $(currentCanvas).hammer({ drag_max_touches: 0 }).on("release", function(ev) {
-        console.log("'release' event!");
-
-        var touches = ev.gesture.touches;
-
-        // Get the touched object, if one exists
-        var eventCount = device.processingInstance.loopSequence.behaviors.length;
-        for (var i = 0; i < eventCount; i++) {
-            var loopEvent = device.processingInstance.loopSequence.behaviors[i];
-
-            if (loopEvent.state === 'MOVING') {
-
-                // deltaX = ev.gesture.center.pageX - (screenWidth / 2);
-                // deltaY = ev.gesture.center.pageY - (screenHeight / 2);
-                // //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
-                // angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
-
-                // x = screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-                // y = screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
-
-                var distance = device.processingInstance.getDistanceFromEventLoop(loopEvent);
-
-                if (distance < 110) {
-
-                    // Update position of the event node and set as "sequenced"
-                    var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
-                    loopEvent.x = nearestPosition.x;
-                    loopEvent.y = nearestPosition.y;
-                    loopEvent.state = 'SEQUENCED';
-
-                    // Update loop ordering
-                    // device.processingInstance.loopSequence.updateOrdering();
-
-                    // TODO: Upload/Submit/Push/Send the update to MCU.
-
-                    // Start the event loop if any behaviors exist
-                    var sequence = device.processingInstance.getBehaviorSequence();
-                    if (sequence.length > 0) {
-                        device.processingInstance.loopSequence.go(); // toggle "go" and "stop"
-                    }
-
-                    // Callback to server to update the program
-                    loopEvent.procedure(loopEvent.options);
-
-                } else {
-
-                    // TODO: Remove behavior from the behavior loop!
-
-                    console.log("DELETING");
-
-                    // Update position of the event node and set as "floating"
-                    loopEvent.state = 'FLOATING';
-
-                    console.log("Deleting " + loopEvent.options.index);
-
-                    deleteBehavior({ index: loopEvent.options.index });
-
-                    // Update loop ordering
-                    // device.processingInstance.loopSequence.updateOrdering();
-
-                    // Stop the event loop if no nodes are placed on it
-                    var sequence = device.processingInstance.getBehaviorSequence();
-                    if (sequence.length == 0) {
-                        device.processingInstance.loopSequence.stop();
-                    } else {
-                        device.processingInstance.loopSequence.go(); // toggle "go" and "stop"
-                    }
-
-                    // Push the behavior change to the server
-                    // TODO: Remove the behavior from the program
-                }
-
-                // TODO: Deploy behavior to device (via HTTP requests).
-
-                disableEventCreate = false;
-
-                break;
-            }
-        }
-
-        disableEventCreate = false;
-
-        // ev.gesture.preventDefault();
-        // ev.stopPropagation();
-        // ev.gesture.stopPropagation();
-        // return;
-    });
-
-    /**
-     * Handle "hold" touch event.
-     */
-    $(currentCanvas).hammer({ drag_max_touches: 0, hold_timeout: 200 }).on("hold", function(ev) {
-        console.log("'hold' event!");
-
-        if (!disableEventCreate) {
-            disableEventCreate = true;
-
-            var touches = ev.gesture.touches;
-
-            // deltaX = ev.gesture.center.pageX - (screenWidth / 2);
-            // deltaY = ev.gesture.center.pageY - (screenHeight / 2);
-            // //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
-            // angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
-
-            // x = screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-            // y = screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
-
-            // var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
-
-            // Show behavior palette
-            device.processingInstance.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
-            device.processingInstance.behaviorPalette.show();
-
-            // var nearestPosition = device.processingInstance.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
-
-            // var loopEvent = new Behavior({
-            //     x: ev.gesture.center.pageX,
-            //     y: ev.gesture.center.pageY,
-            //     xTarget: nearestPosition.x,
-            //     yTarget: nearestPosition.y
-            // });
-
-            // loopEvent.state = 'MOVING';
-            // device.processingInstance.loopSequence.behaviors.push(loopEvent);
-        }
-
-        ev.gesture.preventDefault();
-        ev.stopPropagation();
-        ev.gesture.stopPropagation();
-        return;
-    });
+    //     console.log(this.interface);
+    // }
 }
 
 /**
  * Add an expressive interface to a device.
  */
-function Device(options) {
+function LooperInstance(options) {
     var defaults = {
         address: null,
         canvas: null
@@ -942,13 +1438,13 @@ function Device(options) {
      * Returns the behavior of the device with the specified index.
      */
     this.getBehaviorSequence = function getBehaviorSequence(deviceIndex) {
-      return this.looper.devices[deviceIndex].processingInstance.loopSequence.behaviors;
+      return this.looper.devices[deviceIndex].processing.loopSequence.behaviors;
     }
 
     /**
      * Processing sketch code
      */
-    var deviceSketch = new Processing.Sketch(function(processing) {
+    var sketch = new Processing.Sketch(function(processing) {
 
         processing.currentTime = 0;
         processing.previousTime = 0;
@@ -979,13 +1475,231 @@ function Device(options) {
         processing.loopSequence = new Loop();
 
         // Create behavior palette
-        processing.behaviorPalette = new BehaviorPalette({
-            // x: ev.gesture.center.pageX,
-            // y: ev.gesture.center.pageY,
-            // xTarget: nearestPosition.x,
-            // yTarget: nearestPosition.y,
-            visible: false
-        });
+        processing.behaviorPalette = null; // new BehaviorPalette({ looperInstance: this.looperInstance });
+
+        // processing.behaviorPalette.attachInterface({
+
+        //     processing: processing,
+
+        //     touches: function(x, y) {
+
+        //         console.log(x + ", " + y);
+        //         console.log(processing.behaviorPalette.visible);
+
+        //         if (processing.behaviorPalette.visible) {
+
+        //             var behaviorCount = processing.behaviorPalette.behaviors.length;
+        //             for(var i = 0; i < behaviorCount; i++) {
+        //                 var behavior = processing.behaviorPalette.behaviors[i];
+
+        //                 console.log('behavior:');
+        //                 console.log(behavior);
+
+        //                 console.log("x,y: " + x + ", " + y);
+        //                 console.log("this.x,this.y: " + behavior.x + ", " + behavior.y);
+
+        //                 // Check if palette option is touched
+        //                 if ((x - 50 < processing.behaviorPalette.x + behavior.x && processing.behaviorPalette.x + behavior.x < x + 50)
+        //                     && (y - 50 < processing.behaviorPalette.y + behavior.y && processing.behaviorPalette.y + behavior.y < y + 50)) {
+        //                 // if ((x - 50 < this.x && this.x < x + 50) && (y - 50 < this.y && this.y < y + 50)) {
+        //                     return true;
+        //                 }
+
+        //             }
+        //         }
+
+        //         return false;
+        //     },
+
+        //     draw: function() {
+
+        //         processing.behaviorPalette.updatePosition();
+
+        //         if (processing.behaviorPalette.visible) {
+        //             var behaviorCount = processing.behaviorPalette.behaviors.length;
+        //             for(var i = 0; i < behaviorCount; i++) {
+        //                 var behavior = processing.behaviorPalette.behaviors[i];
+
+        //                 processing.pushMatrix();
+
+        //                 // Draw the palette
+        //                 processing.fill(66, 214, 146);
+        //                 processing.ellipse(processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y, 80, 80);
+
+        //                 primaryFont = processing.createFont("/DidactGothic.ttf", 32);
+        //                 processing.textFont(primaryFont, 16);
+        //                 processing.textAlign(processing.CENTER);
+        //                 processing.fill(65, 65, 65);
+        //                 processing.text(behavior.label, processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y + 4);
+
+        //                 processing.popMatrix();
+        //             }
+        //         }
+
+        //     },
+
+        //     events: {
+        //         tap: function() {
+        //             console.log("tap");
+        //         },
+        //         touch: function() {
+
+        //             console.log("touch!!!!!");
+
+
+        //             if (processing.behaviorPalette.visible) {
+
+        //     var behaviorCount = processing.behaviorPalette.behaviors.length;
+        //     for(var i = 0; i < behaviorCount; i++) {
+        //         var behavior = processing.behaviorPalette.behaviors[i];
+
+        //         console.log('behavior:')
+        //         console.log(behavior);
+
+        //         // HACK/TODO: In the palette, add the actual behaviors, then the behaviors' interfaces can respond to the events individually! they have different faces!
+
+        //         // Check if palette option is touched
+        //         if ((ev.gesture.center.pageX - 50 < processing.behaviorPalette.x + behavior.x && behaviorPalette.x + behavior.x < ev.gesture.center.pageX + 50)
+        //             && (ev.gesture.center.pageY - 50 < processing.behaviorPalette.y + behavior.y && behaviorPalette.y + behavior.y < ev.gesture.center.pageY + 50)) {
+
+        //             // Hide the behavior palette
+        //             processing.behaviorPalette.visible = false;
+
+        //             // Create behavior node
+        //             var nearestPosition = processing.getNearestPositionOnEventLoop(x, y);
+
+        //             var loopBehavior = new Behavior({
+        //                 x: processing.behaviorPalette.x + behavior.x,
+        //                 y: processing.behaviorPalette.y + behavior.y,
+        //                 xTarget: nearestPosition.x,
+        //                 yTarget: nearestPosition.y
+        //             });
+        //             // loopBehavior.attachInterface({
+        //             //     processing: d.processing,
+        //             //     touches: function(x, y) {
+        //             //         return true;
+        //             //     },
+        //             //     // draw: {
+
+        //             //     // },
+        //             //     events: {
+        //             //         tap: function() {
+
+        //             //         },
+        //             //         touch: function() {
+        //             //             //loopBehavior.visible = false;
+        //             //             loopBehavior.state = 'MOVING';
+        //             //             disableEventCreate = true;
+
+        //             //             // Invoke behavior's "on click" behavior.
+        //             //             loopBehavior.onClick();
+
+        //             //             console.log("\teventED!!");
+        //             //         },
+        //             //         hold: function() {
+
+        //             //         },
+        //             //         release: function() {
+
+        //             //         }
+        //             //     }
+        //             // });
+
+        //             // Update for selected behavior
+        //             loopBehavior.label = behavior.label;
+        //             loopBehavior.procedure = behavior.procedure;
+        //             loopBehavior.options = behavior.options;
+
+        //             loopBehavior.qualities = behavior.qualities;
+
+        //             loopBehavior.onClick = behavior.onClick;
+
+        //             console.log(loopBehavior);
+
+        //             // Update the state of the event node
+        //             loopBehavior.state = 'MOVING';
+        //             processing.loopSequence.behaviors.push(loopBehavior);
+        //         }
+
+        //     }
+        // }
+
+        //             // // Hide the behavior palette
+        //             //         processing.behaviorPalette.visible = false;
+
+        //             //         // Create behavior node
+        //             //         var nearestPosition = processing.getNearestPositionOnEventLoop(ev.gesture.center.pageX, ev.gesture.center.pageY);
+
+        //             //         var loopBehavior = new Behavior({
+        //             //             x: processing.behaviorPalette.x + behavior.x,
+        //             //             y: processing.behaviorPalette.y + behavior.y,
+        //             //             xTarget: nearestPosition.x,
+        //             //             yTarget: nearestPosition.y
+        //             //         });
+        //             //         // loopBehavior.attachInterface({
+        //             //         //     processing: device.processing,
+        //             //         //     touches: function(x, y) {
+        //             //         //         return true;
+        //             //         //     },
+        //             //         //     // draw: {
+
+        //             //         //     // },
+        //             //         //     events: {
+        //             //         //         tap: function() {
+
+        //             //         //         },
+        //             //         //         touch: function() {
+        //             //         //             //loopBehavior.visible = false;
+        //             //         //             loopBehavior.state = 'MOVING';
+        //             //         //             disableEventCreate = true;
+
+        //             //         //             // Invoke behavior's "on click" behavior.
+        //             //         //             loopBehavior.onClick();
+
+        //             //         //             console.log("\teventED!!");
+        //             //         //         },
+        //             //         //         hold: function() {
+
+        //             //         //         },
+        //             //         //         release: function() {
+
+        //             //         //         }
+        //             //         //     }
+        //             //         // });
+
+        //             //         // Update for selected behavior
+        //             //         loopBehavior.label = behavior.label;
+        //             //         loopBehavior.procedure = behavior.procedure;
+        //             //         loopBehavior.options = behavior.options;
+
+        //             //         loopBehavior.qualities = behavior.qualities;
+
+        //             //         loopBehavior.onClick = behavior.onClick;
+
+        //             //         console.log(loopBehavior);
+
+        //             //         // Update the state of the event node
+        //             //         loopBehavior.state = 'MOVING';
+        //             //         processing.loopSequence.behaviors.push(loopBehavior);
+
+
+        //             // // //loopBehavior.visible = false;
+        //             // // loopBehavior.state = 'MOVING';
+        //             // // disableEventCreate = true;
+
+        //             // // // Invoke behavior's "on click" behavior.
+        //             // // loopBehavior.onClick();
+
+        //             // // console.log("\teventED!!");
+        //         },
+        //         hold: function() {
+        //             console.log("hold");
+        //         },
+        //         release: function() {
+        //             console.log("release");
+        //         }
+        //     }
+        // });
 
         /**
          * Setup behavior palette.
@@ -997,8 +1711,8 @@ function Device(options) {
                 type: 'light',
                 label: 'light',
 
-                x: -100,
-                y: 0,
+                x: processing.behaviorPalette.x + -100,
+                y: processing.behaviorPalette.y + 0,
 
                 procedure: function(options) {
                     console.log('light on top level');
@@ -1014,8 +1728,8 @@ function Device(options) {
                 type: 'time',
                 label: 'time',
 
-                x: 100,
-                y: 0,
+                x: processing.behaviorPalette.x + 100,
+                y: processing.behaviorPalette.y + 0,
 
                 procedure: function(options) {
                     console.log('time on top level');
@@ -1031,8 +1745,8 @@ function Device(options) {
                 type: 'input',
                 label: 'input',
 
-                x: 0,
-                y: 0,
+                x: processing.behaviorPalette.x + 0,
+                y: processing.behaviorPalette.y + 0,
 
                 procedure: function(options) {
                     console.log('input on top level');
@@ -1053,7 +1767,7 @@ function Device(options) {
 
             this.font = processing.loadFont("/DidactGothic.ttf");
 
-            this.setupBehaviorPalette();
+            // this.setupBehaviorPalette();
         }
 
         /**
@@ -1100,191 +1814,226 @@ function Device(options) {
              */
             function drawBehaviors() {
 
-                processing.pushMatrix();
+                // processing.pushMatrix();
 
-                var eventCount = processing.loopSequence.behaviors.length;
-                for (var i = 0; i < eventCount; i++) {
-                    var behavior = processing.loopSequence.behaviors[i];
+                // var eventCount = processing.loopSequence.behaviors.length;
+                // for (var i = 0; i < eventCount; i++) {
+                //     var behavior = processing.loopSequence.behaviors[i];
 
-                    processing.updatePosition(behavior);
+                //     processing.updatePosition(behavior);
 
-                    // Draw the event node
-                    processing.fill(66, 214, 146);
-                    if (behavior.going) {
-                        processing.ellipse(behavior.x, behavior.y, 70, 70);
+                //     // Draw the event node
+                //     processing.fill(66, 214, 146);
+                //     if (behavior.going) {
+                //         processing.ellipse(behavior.x, behavior.y, 70, 70);
 
-                        // Show the program counter
-                        if (behavior.state == 'SEQUENCED') {
-                            var angle = getAngle(behavior.x, behavior.y);
-                            var nearestX = processing.screenWidth / 2 + (500 / 2) * Math.cos(angle - Math.PI  / 2);
-                            var nearestY = processing.screenHeight / 2 + (500 / 2) * Math.sin(angle - Math.PI  / 2);
-                            processing.ellipse(nearestX, nearestY, 20, 20);
-                        }
-                    } else {
-                        processing.ellipse(behavior.x, behavior.y, 70, 70);
+                //         // Show the program counter
+                //         if (behavior.state == 'SEQUENCED') {
+                //             var angle = getAngle(behavior.x, behavior.y);
+                //             var nearestX = processing.screenWidth / 2 + (500 / 2) * Math.cos(angle - Math.PI  / 2);
+                //             var nearestY = processing.screenHeight / 2 + (500 / 2) * Math.sin(angle - Math.PI  / 2);
+                //             processing.ellipse(nearestX, nearestY, 20, 20);
+                //         }
+                //     } else {
+                //         processing.ellipse(behavior.x, behavior.y, 70, 70);
 
-                        // // Draw options for the sequenced node
-                        // if (behavior.state == 'SEQUENCED') {
-                        //     processing.ellipse(behavior.x + 40, behavior.y - 40, 30, 30);
-                        // }
-                    }
+                //         // // Draw options for the sequenced node
+                //         // if (behavior.state == 'SEQUENCED') {
+                //         //     processing.ellipse(behavior.x + 40, behavior.y - 40, 30, 30);
+                //         // }
+                //     }
 
-                    primaryFont = processing.createFont("/DidactGothic.ttf", 32);
-                    processing.textFont(primaryFont, 16);
-                    processing.textAlign(processing.CENTER);
-                    processing.fill(65, 65, 65);
-                    var label = behavior.label;
-                    // if (behavior.label === 'light') {
-                    //     label = 'light on';
-                    // } else if (behavior.label === 'light on') {
-                    //     label = 'light off';
-                    // } else if (behavior.label === 'light off') {
-                    //     label = 'light on';
-                    // }
-                    processing.text(label, behavior.x, behavior.y + 4);
+                //     primaryFont = processing.createFont("/DidactGothic.ttf", 32);
+                //     processing.textFont(primaryFont, 16);
+                //     processing.textAlign(processing.CENTER);
+                //     processing.fill(65, 65, 65);
+                //     var label = behavior.label;
+                //     // if (behavior.label === 'light') {
+                //     //     label = 'light on';
+                //     // } else if (behavior.label === 'light on') {
+                //     //     label = 'light off';
+                //     // } else if (behavior.label === 'light off') {
+                //     //     label = 'light on';
+                //     // }
+                //     processing.text(label, behavior.x, behavior.y + 4);
 
-                    // Draw behaviors
-                    if (behavior.label === 'light') {
+                //     // Draw behaviors
+                //     if (behavior.label === 'light') {
 
-                        //processing.ellipse(behavior.x, behavior.y, 70, 70);
+                //         //processing.ellipse(behavior.x, behavior.y, 70, 70);
 
-                        // TODO:/HACK:
-                        // Show the program counter
-                        if (behavior.state == 'SEQUENCED') {
+                //         // TODO:/HACK:
+                //         // Show the program counter
+                //         if (behavior.state == 'SEQUENCED') {
 
-                            // Slider
-                            // Interface properties
-                            processing.fill(66, 214, 146);
-                            var angle = getAngle(behavior.x, behavior.y);
-                            var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
-                            var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
-                            // Draw interface
-                            processing.line(nearestX + 30, nearestY + 50, nearestX + 30 + 100, nearestY + 50);
-                            processing.ellipse(nearestX + 30, nearestY + 50, 20, 20);
+                //             // Slider
+                //             // Interface properties
+                //             processing.fill(66, 214, 146);
+                //             var angle = getAngle(behavior.x, behavior.y);
+                //             var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
+                //             var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
+                //             // Draw interface
+                //             processing.line(nearestX + 30, nearestY + 50, nearestX + 30 + 100, nearestY + 50);
+                //             processing.ellipse(nearestX + 30, nearestY + 50, 20, 20);
 
-                            // Button
-                            processing.fill(66, 214, 146);
-                            var angle = getAngle(behavior.x, behavior.y);
-                            var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
-                            var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
-                            processing.ellipse(nearestX, nearestY, 40, 40);
+                //             // Button
+                //             processing.fill(66, 214, 146);
+                //             var angle = getAngle(behavior.x, behavior.y);
+                //             var nearestX = processing.screenWidth / 2 + (530 / 2) * Math.cos(angle - Math.PI  / 2);
+                //             var nearestY = processing.screenHeight / 2 + (530 / 2) * Math.sin(angle - Math.PI  / 2);
+                //             processing.ellipse(nearestX, nearestY, 40, 40);
 
-                            primaryFont = processing.createFont("/DidactGothic.ttf", 32);
-                            processing.textFont(primaryFont, 16);
-                            processing.textAlign(processing.CENTER);
-                            processing.fill(65, 65, 65);
+                //             primaryFont = processing.createFont("/DidactGothic.ttf", 32);
+                //             processing.textFont(primaryFont, 16);
+                //             processing.textAlign(processing.CENTER);
+                //             processing.fill(65, 65, 65);
 
-                            if (behavior.qualities.brightness === 100) {
-                                // Update visual interface
-                                processing.text("on", nearestX, nearestY + 4);
+                //             if (behavior.qualities.brightness === 100) {
+                //                 // Update visual interface
+                //                 processing.text("on", nearestX, nearestY + 4);
 
-                                // TODO: Perform pre-state update procedure
+                //                 // TODO: Perform pre-state update procedure
 
-                                // Update behavior qualities
-                                behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
-                            } else {
-                                processing.text("off", nearestX, nearestY + 4);
+                //                 // Update behavior qualities
+                //                 behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
+                //             } else {
+                //                 processing.text("off", nearestX, nearestY + 4);
 
-                                // TODO: Perform pre-state update procedure
+                //                 // TODO: Perform pre-state update procedure
 
-                                // Update behavior qualities
-                                behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
-                            }
-                        }
-                    }
+                //                 // Update behavior qualities
+                //                 behavior.options.value = (behavior.qualities.brightness === 0 ? 0 : 1); // HACK: brightness ranges from 0–100, options.value ranges from 0 to 1
+                //             }
+                //         }
+                //     }
 
-                    // Calculate nearest point on circle
-                    //line(behavior.x, behavior.y, screenWidth / 2, screenHeight / 2);
+                //     // Calculate nearest point on circle
+                //     //line(behavior.x, behavior.y, screenWidth / 2, screenHeight / 2);
+                // }
+
+                // Update state
+                // if (!disableEventCreate) {
+                //     if (device.processing.behaviorPalette != null) {
+
+                //         var behaviorCount = device.processing.behaviorPalette.behaviors.length;
+                //         console.log("behaviorCount = " + behaviorCount);
+                //         for (var i = 0; i < behaviorCount; ) {
+
+                //             if (device.processing.behaviorPalette.behaviors[i].state === 'PROTOTYPE') {
+                //                 device.processing.behaviorPalette.behaviors.splice(i, 1);
+                //                 behaviorCount--;
+                //                 continue;                                
+                //             }
+
+                //             i++;
+                //         }
+
+                //         // console.log("looperInstance = ");
+                //         // console.log(device.processing.looperInstance);
+                //         // device.processing.behaviorPalette = new BehaviorPalette({ looperInstance: device });
+                //         // device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+                //         // device.processing.behaviorPalette.updatePosition();
+                //         // device.processing.setupBehaviorPalette();
+                //         // console.log(device.processing.behaviorPalette);
+
+                //         // Destroy behavior palette!
+                //         device.processing.behaviorPalette = null;
+                //     }
+                // }
+
+                // Draw based on latest state
+                for (var i = 0; i < this.interfaces.length; i++) {
+                    this.interfaces[i].draw();
                 }
 
-                processing.popMatrix();
+                // processing.popMatrix();
             }
 
-            /**
-             * Draws the behavior palette.
-             */
-            function drawBehaviorPalette() {
+            // /**
+            //  * Draws the behavior palette.
+            //  */
+            // function drawBehaviorPalette() {
 
-                processing.behaviorPalette.updatePosition();
+            //     processing.behaviorPalette.updatePosition();
 
-                if (processing.behaviorPalette.visible) {
-                    drawBehaviors();
-                }
+            //     if (processing.behaviorPalette.visible) {
+            //         drawBehaviors();
+            //     }
 
-                function drawBehaviors() {
+            //     function drawBehaviors() {
 
-                    var behaviorCount = processing.behaviorPalette.behaviors.length;
-                    for(var i = 0; i < behaviorCount; i++) {
-                        var behavior = processing.behaviorPalette.behaviors[i];
+            //         var behaviorCount = processing.behaviorPalette.behaviors.length;
+            //         for(var i = 0; i < behaviorCount; i++) {
+            //             var behavior = processing.behaviorPalette.behaviors[i];
 
-                        processing.pushMatrix();
+            //             processing.pushMatrix();
 
-                        // Draw the palette
-                        processing.fill(66, 214, 146);
-                        processing.ellipse(processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y, 80, 80);
+            //             // Draw the palette
+            //             processing.fill(66, 214, 146);
+            //             processing.ellipse(processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y, 80, 80);
 
-                        primaryFont = processing.createFont("/DidactGothic.ttf", 32);
-                        processing.textFont(primaryFont, 16);
-                        processing.textAlign(processing.CENTER);
-                        processing.fill(65, 65, 65);
-                        processing.text(behavior.label, processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y + 4);
+            //             primaryFont = processing.createFont("/DidactGothic.ttf", 32);
+            //             processing.textFont(primaryFont, 16);
+            //             processing.textAlign(processing.CENTER);
+            //             processing.fill(65, 65, 65);
+            //             processing.text(behavior.label, processing.behaviorPalette.x + behavior.x, processing.behaviorPalette.y + behavior.y + 4);
 
-                        processing.popMatrix();
-                    }
-                }
-            }
+            //             processing.popMatrix();
+            //         }
+            //     }
+            // }
 
             /**
              * Updates position of event node.
              */
-            function updatePosition(loopEvent) {
+            // processing.updatePosition = function(loopBehavior) {
 
-                if (loopEvent.x !== loopEvent.xTarget || loopEvent.y !== loopEvent.yTarget) { // FREE
-                    //console.log("Rendering ghost");
-                }
+            //     if (loopBehavior.x !== loopBehavior.xTarget || loopBehavior.y !== loopBehavior.yTarget) { // FREE
+            //         //console.log("Rendering ghost");
+            //     }
 
-                if (loopEvent.state === 'MOVING') {
+            //     // if (loopBehavior.state === 'MOVING') {
 
-                    // Standard update for a moving event
-                    currentMouseX = processing.screenWidth * (processing.deviceCount + 1) + processing.mouseX;
-                    loopEvent.x = currentMouseX;
-                    loopEvent.y = processing.mouseY;
+            //     //     // Standard update for a moving event
+            //     //     currentMouseX = processing.screenWidth * (processing.deviceCount + 1) + processing.mouseX;
+            //     //     loopBehavior.interface.x = currentMouseX;
+            //     //     loopBehavior.interface.y = processing.mouseY;
 
-                    deltaX = currentMouseX - (processing.screenWidth / 2);
-                    deltaY = processing.mouseY - (processing.screenHeight / 2);
-                    angleInDegrees = Math.atan2(deltaY, deltaX);
+            //     //     deltaX = currentMouseX - (processing.screenWidth / 2);
+            //     //     deltaY = processing.mouseY - (processing.screenHeight / 2);
+            //     //     angleInDegrees = Math.atan2(deltaY, deltaX);
 
-                    loopEvent.xTarget = processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-                    loopEvent.yTarget = processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+            //     //     loopBehavior.interface.xTarget = processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+            //     //     loopBehavior.interface.yTarget = processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
 
-                    // Check if under certain distance from the circle (and attach to)
-                    var distance = processing.lineDistance(loopEvent.x, loopEvent.y, loopEvent.xTarget, loopEvent.yTarget);
+            //     //     // Check if under certain distance from the circle (and attach to)
+            //     //     var distance = processing.lineDistance(loopBehavior.interface.x, loopBehavior.interface.y, loopBehavior.interface.xTarget, loopBehavior.interface.yTarget);
 
-                    if (distance < 110) { // ENTANGLED
-                        processing.line(loopEvent.x, loopEvent.y, loopEvent.xTarget, loopEvent.yTarget);
+            //     //     if (distance < 110) { // ENTANGLED
+            //     //         processing.line(loopBehavior.interface.x, loopBehavior.interface.y, loopBehavior.interface.xTarget, loopBehavior.interface.yTarget);
 
-                        // Draw the "would be" position that the event node would occupy
-                        processing.fill(66, 214, 146, 50);
-                        processing.ellipse(loopEvent.xTarget, loopEvent.yTarget, 50, 50);
+            //     //         // Draw the "would be" position that the event node would occupy
+            //     //         processing.fill(66, 214, 146, 50);
+            //     //         processing.ellipse(loopBehavior.interface.xTarget, loopBehavior.interface.yTarget, 50, 50);
 
-                        // Snap to event loop
-                        if (!disableEventCreate) {
-                            deltaX = processing.mouseX - (processing.screenWidth / 2);
-                            deltaY = processing.mouseY - (processing.screenHeight / 2);
-                            //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
-                            angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+            //     //         // Snap to event loop
+            //     //         if (!disableEventCreate) {
+            //     //             deltaX = processing.mouseX - (processing.screenWidth / 2);
+            //     //             deltaY = processing.mouseY - (processing.screenHeight / 2);
+            //     //             //angleInDegrees = Math.atan(deltaY / deltaX) * 180 / PI;
+            //     //             angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
 
-                            loopEvent.x = processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-                            loopEvent.y = processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
-                        }
-                    }
+            //     //             loopBehavior.interface.x = processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+            //     //             loopBehavior.interface.y = processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+            //     //         }
+            //     //     }
 
-                } else if (loopEvent.state === 'FLOATING') {
-                    processing.fill(66, 214, 146, 50);
-                    processing.ellipse(loopEvent.x, loopEvent.y, 70, 70);
-                }
-            }
-            processing.updatePosition = updatePosition;
+            //     // }
+            //     // else if (loopBehavior.state === 'FLOATING') {
+            //     //     processing.fill(66, 214, 146, 50);
+            //     //     processing.ellipse(loopBehavior.interface.x, loopBehavior.interface.y, 70, 70);
+            //     // }
+            // }
 
             /**
              * Returns the sequence of behaviors in the event queue.
@@ -1296,38 +2045,38 @@ function Device(options) {
 
                 // Populate array for sorting
                 for (var i = 0; i < eventCount; i++) {
-                    var loopEvent = processing.loopSequence.behaviors[i];
-                    if (loopEvent.state === 'SEQUENCED') {
+                    var loopBehavior = processing.loopSequence.behaviors[i];
+                    if (loopBehavior.state === 'SEQUENCED') {
                         
                         behaviorSequence.push({
-                            event: loopEvent,
-                            angle: processing.getAngle(loopEvent.x, loopEvent.y)
+                            event: loopBehavior,
+                            angle: processing.getAngle(loopBehavior.x, loopBehavior.y)
                         });
                     }
                 }
 
                 // Perform insertion sort
                 var i, j;
-                var loopEvent;
+                var loopBehavior;
                 eventCount = behaviorSequence.length;
                 for (var i = 0; i < eventCount; i++) {
-                    loopEvent = behaviorSequence[i];
+                    loopBehavior = behaviorSequence[i];
 
-                    for (j = i-1; j > -1 && behaviorSequence[j].angle > loopEvent.angle; j--) {
+                    for (j = i-1; j > -1 && behaviorSequence[j].angle > loopBehavior.angle; j--) {
                         behaviorSequence[j+1] = behaviorSequence[j];
                     }
 
-                    behaviorSequence[j+1] = loopEvent;
+                    behaviorSequence[j+1] = loopBehavior;
                 }
 
                 console.log(behaviorSequence);
 
                 for (var i = 0; i < behaviorSequence.length; i++) {
-                    loopEvent = behaviorSequence[i];
+                    loopBehavior = behaviorSequence[i];
 
-                    console.log(loopEvent);
+                    console.log(loopBehavior);
 
-                    var behaviorScript = loopEvent.event.procedure;
+                    var behaviorScript = loopBehavior.event.procedure;
                 }
 
                 return behaviorSequence;
@@ -1337,7 +2086,9 @@ function Device(options) {
             /**
              * Returns the distance between the two specified points.
              */
-            function lineDistance(x1, y1, x2, y2) {
+            processing.lineDistance = function(x1, y1, x2, y2) {
+                console.log("lineDistance");
+
                 var xs = 0;
                 var ys = 0;
 
@@ -1349,7 +2100,6 @@ function Device(options) {
 
                 return Math.sqrt(xs + ys);
             }
-            processing.lineDistance = lineDistance;
 
             /**
              * Get the (x,y) point on the loop.
@@ -1420,11 +2170,12 @@ function Device(options) {
             /**
              * Get the distance to the loop from the given node.
              */
-            function getDistanceFromEventLoop(loopEvent) {
-                var distance = processing.lineDistance(loopEvent.x, loopEvent.y, loopEvent.xTarget, loopEvent.yTarget);
+            processing.getDistanceFromEventLoop = function(loopBehavior) {
+                console.log("getDistanceFromEventLoop");
+                console.log(loopBehavior);
+                var distance = processing.lineDistance(loopBehavior.x, loopBehavior.y, loopBehavior.xTarget, loopBehavior.yTarget);
                 return distance;
             }
-            processing.getDistanceFromEventLoop = getDistanceFromEventLoop;
 
             /**
              * Start of actual loop instructions. The things above are definitions.
@@ -1442,14 +2193,29 @@ function Device(options) {
 
             drawLoop();
             drawBehaviors();
-            drawBehaviorPalette();
+            // drawBehaviorPalette();
         };
     });
 
-    // deviceSketch.options.crispLines = true;
-    this.processingInstance = new Processing(canvas, deviceSketch);
-    this.processingInstance.canvas = canvas;
-    this.processingInstance.deviceCount = deviceCount;
-    // this.loopSequence = this.processingInstance.loopSequence;
-    console.log(this.processingInstance);
+    // sketch.options.crispLines = true;
+    this.processing = new Processing(canvas, sketch);
+    this.processing.canvas = canvas;
+    this.processing.deviceCount = deviceCount;
+    this.processing.looperInstance = this;
+
+    // console.log("looperInstance = ");
+    // console.log(this.processing.looperInstance);
+    // this.processing.behaviorPalette = new BehaviorPalette({ looperInstance: this });
+    // this.processing.setupBehaviorPalette();
+    // console.log(this.processing.behaviorPalette);
+
+    console.log("FUN!");
+    console.log(this.processing.looperInstance);
+
+    // iface = new Interface({ processing: this.processing });
+
+
+
+    // this.loopSequence = this.processing.loopSequence;
+    // console.log(this.processing);
 }

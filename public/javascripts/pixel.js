@@ -44,7 +44,7 @@
 //   /sync
 //   /action (behavior consists of one or more actions)
 
-// function Device() {
+// function LooperInstance() {
 //     // TODO: Implement device... add post, get, pin, pwm, etc. so they can be called for this device!
 // }
 
@@ -300,6 +300,31 @@ function erase(options) {
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/erase");
+    var params = "";
+
+    http.open("POST", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    http.onreadystatechange = function() { //Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            console.log(http.responseText);
+        }
+    }
+    http.send(params);
+}
+
+function reboot(options) {
+    var defaults = {
+        // TODO: List default parameter values here.
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/reboot");
     var params = "";
 
     http.open("POST", url, true);

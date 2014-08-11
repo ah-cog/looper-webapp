@@ -10,6 +10,9 @@
     <link href='http://fonts.googleapis.com/css?family=Didact+Gothic' rel='stylesheet' type='text/css'>
 
     <link rel="stylesheet" href="/stylesheets/style.css" />
+
+    <head profile="http://www.w3.org/2005/10/profile">
+    <link rel="icon" type="image/png" href="/favicon.png">
 </head>
 
 <body>
@@ -102,9 +105,7 @@
     <script src="/javascripts/looper.js"></script>
     <script>
     looper = new Looper();
-    looper.addDevice({ address: "192.168.1.3" });
-    // looper.addDevice();
-    // looper.addDevice();
+    looper.addDevice({ address: "192.168.1.5" });
     looper.showDeviceByIndex(0);
     erase();
     </script>

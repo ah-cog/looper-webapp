@@ -93,7 +93,7 @@
 //     http.send(params);
 // }
 
-function deleteBehavior(options) {
+function deleteBehavior2(options) {
     var defaults = {
         index: -1
     };
@@ -122,7 +122,7 @@ function deleteBehavior(options) {
 }
 
 // TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
-function updateBehavior(options) {
+function updateBehavior2(options) {
     var defaults = {
         index: -1,
         pin: -1,
@@ -150,6 +150,150 @@ function updateBehavior(options) {
     http.onreadystatechange = function() { // Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
            console.log(http.responseText);
+        }
+    }
+    http.send(params);
+}
+
+// TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
+//function pin(index, pin, operation, type, mode, value) {
+function createBehavior(options) {
+    var defaults = {
+        name: "pin",
+        pin: -1,
+        operation: 0,
+        type: 0,
+        mode: 0,
+        value: 0
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/behavior");
+    var params = "name=" + options['name'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
+    url = url.concat('?', params);
+    
+    http.open("POST", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+           console.log(http.responseText);
+        } else if(http.readyState == 4 && http.status == 201) {
+            console.log("Behavior created successfully.");
+            console.log(http.getResponseHeader('Location'));
+        }
+    }
+    http.send(params);
+}
+
+function getBehavior(options, callback) {
+    var defaults = {
+        id: -1
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/behavior");
+    var params = "id=" + options['id'];
+    url = url.concat('?', params);
+    
+    http.open("GET", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+
+            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
+
+            console.log("Behavior got.");
+            console.log(http.responseText);
+
+            if (callback !== undefined) {
+                callback(); // The callback function
+            }
+        }
+    }
+    http.send(params);
+}
+
+function updateBehavior(options) {
+    var defaults = {
+        id: -1,
+        pin: -1,
+        operation: 0,
+        type: 0,
+        mode: 0,
+        value: 0
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/behavior");
+    var params = "id=" + options['id'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
+    url = url.concat('?', params);
+    
+    http.open("PUT", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            console.log("Behavior updated successfully.");
+            console.log(http.responseText);
+        } else if(http.readyState == 4 && http.status == 404) {
+            console.log("Behavior NOT updated.");
+            console.log(http.responseText);
+        }
+    }
+    http.send(params);
+}
+
+function deleteBehavior(options) {
+    var defaults = {
+        id: -1
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat("/behavior");
+    var params = "id=" + options['id'] + "";
+    url = url.concat('?', params);
+    
+    http.open("DELETE", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            console.log("Behavior deleted successfully.");
+            console.log(http.responseText);
+        } else if(http.readyState == 4 && http.status == 401) {
+            console.log("Behavior NOT deleted.");
+            console.log(http.responseText);
         }
     }
     http.send(params);

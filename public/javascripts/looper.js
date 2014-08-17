@@ -1187,9 +1187,9 @@ function LooperInstance(options) {
             var color = { red: randomRed, green: randomGreen, blue: randomBlue };
             return color;
         }
-        // var color = generateRandomColor(255, 255, 255);
-        // var backgroundColor = processing.color(color.red, color.green, color.blue);
-        var backgroundColor = processing.color(240, 241, 240);
+        var color = { red: 255, green: 255, blue: 255 }; // generateRandomColor(255, 255, 255);
+        var backgroundColor = processing.color(color.red, color.green, color.blue);
+        // var backgroundColor = processing.color(240, 241, 240);
 
         processing.loopSequence = new Loop();
 
@@ -1200,6 +1200,9 @@ function LooperInstance(options) {
          * Setup behavior palette.
          */
         processing.setupBehaviorPalette = function() {
+
+            // TODO: Move "addBehavior" to looperInstance
+            // TODO: Refactor setupBehaviorPalette to be part of Behavior class constructor, adding behaviors from the looperInstance (from previous TODO)
 
             // Add "default" behaviors to palette
             processing.behaviorPalette.addBehavior({
@@ -1258,11 +1261,42 @@ function LooperInstance(options) {
          * Override setup function.
          */
         processing.setup = function() {
-            processing.size(processing.screenWidth, processing.screenHeight);
+            this.size(this.screenWidth, this.screenHeight);
 
-            this.font = processing.loadFont("/DidactGothic.ttf");
+            this.font = this.loadFont("/DidactGothic.ttf");
+        }
 
-            // this.setupBehaviorPalette();
+        processing.drawLoop = function() {
+            this.pushMatrix();
+
+            // Draw the loop
+            this.strokeWeight(1.0);
+            this.stroke(65, 65, 65);
+            this.noFill();
+            this.smooth();
+            this.arc(this.screenWidth / 2, this.screenHeight / 2, 400, 400, (-this.PI/2) + 0.05*this.PI, 1.45*this.PI);
+
+            // Highlight a section of the arc
+            /*
+            processing.strokeWeight(8.0);
+            processing.stroke(65, 65, 65);
+            processing.noFill();
+            processing.smooth();
+            var offset = 0.0;
+            var length = 0.15;
+            processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + ((offset + 0.05) * processing.PI), (-processing.PI/2) + ((offset + 0.05 + length) * processing.PI));
+            */
+
+            // Draw the loop's arrowhead to indicate its sequence order
+            this.strokeWeight(1.0);
+            this.stroke(65, 65, 65);
+            this.translate(this.screenWidth / 2, this.screenHeight / 2);
+            this.translate(-29, -198);
+            this.rotate(-0.05 * this.PI);
+            this.line(0, 0, -16, 16);
+            this.line(0, 0, -16, -16);
+
+            this.popMatrix();
         }
 
         /**
@@ -1270,44 +1304,10 @@ function LooperInstance(options) {
          */
         processing.draw = function() {
 
-            function drawLoop() {
-
-                processing.pushMatrix();
-
-                // Draw the loop
-                processing.strokeWeight(1.0);
-                processing.stroke(65, 65, 65);
-                processing.noFill();
-                processing.smooth();
-                processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + 0.05*processing.PI, 1.45*processing.PI);
-
-                // Highlight a section of the arc
-                /*
-                processing.strokeWeight(8.0);
-                processing.stroke(65, 65, 65);
-                processing.noFill();
-                processing.smooth();
-                var offset = 0.0;
-                var length = 0.15;
-                processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + ((offset + 0.05) * processing.PI), (-processing.PI/2) + ((offset + 0.05 + length) * processing.PI));
-                */
-
-                // Draw the loop's arrowhead to indicate its sequence order
-                processing.strokeWeight(1.0);
-                processing.stroke(65, 65, 65);
-                processing.translate(processing.screenWidth / 2, processing.screenHeight / 2);
-                processing.translate(-29, -198);
-                processing.rotate(-0.05 * processing.PI);
-                processing.line(0, 0, -16, 16);
-                processing.line(0, 0, -16, -16);
-
-                processing.popMatrix();
-            }
-
             /**
              * Draw behaviors.
              */
-            function drawBehaviors() {
+            function drawInterfaces() {
 
                 // processing.pushMatrix();
 
@@ -1475,8 +1475,9 @@ function LooperInstance(options) {
                 processing.loopSequence.step();
             }
 
-            drawLoop();
-            drawBehaviors();
+            this.drawLoop(); // TODO: Make Interface for this! Then remove!
+
+            drawInterfaces();
         };
     });
 

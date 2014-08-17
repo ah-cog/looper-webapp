@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Pixel</title>
+    <title>Looper</title>
 
     <script src="/javascripts/processing.js"></script>
     <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
@@ -92,7 +92,7 @@
     }
 
     void draw() {
-        background(#F0F1F0);
+        background(#ffffff); // background(#F0F1F0);
         primaryFont = createFont("/DidactGothic.ttf", 32);
         textFont(primaryFont, 100);
         textAlign(CENTER);
@@ -105,7 +105,7 @@
     <script src="/javascripts/looper.js"></script>
     <script>
     looper = new Looper();
-    looper.addDevice({ address: "192.168.1.5" });
+    looper.addDevice({ address: "192.168.1.9" });
     looper.showDeviceByIndex(0);
     erase();
     </script>

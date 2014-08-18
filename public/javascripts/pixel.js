@@ -159,12 +159,10 @@ function updateBehavior2(options) {
 //function pin(index, pin, operation, type, mode, value) {
 function createBehavior(options) {
     var defaults = {
-        name: "pin",
-        pin: -1,
-        operation: 0,
-        type: 0,
-        mode: 0,
-        value: 0
+        type: "output",
+        pin: 5,
+        signal: "digital",
+        data: "on"
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -173,7 +171,7 @@ function createBehavior(options) {
     //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "name=" + options['name'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
+    var params = "type=" + options['type'] + "&pin=" + options['pin'] + "&signal=" + options['signal'] + "&data=" + options['data'];
     url = url.concat('?', params);
     
     http.open("POST", url, true);
@@ -216,15 +214,15 @@ function getBehavior(options, callback) {
     
     http.onreadystatechange = function() { // Call a function when the state changes.
         if(http.readyState == 4 && http.status == 200) {
-
-            // TODO: Update the "local" Pixel reflection (i.e., the one cached in the browser)
-
-            console.log("Behavior got.");
+            console.log("Behavior got successfully.");
             console.log(http.responseText);
 
-            if (callback !== undefined) {
-                callback(); // The callback function
-            }
+            // if (callback !== undefined) {
+            //     callback(); // The callback function
+            // }
+        } else if(http.readyState == 4 && http.status == 404) {
+            console.log("Behavior NOT got.");
+            console.log(http.responseText);
         }
     }
     http.send(params);
@@ -233,11 +231,10 @@ function getBehavior(options, callback) {
 function updateBehavior(options) {
     var defaults = {
         id: -1,
-        pin: -1,
-        operation: 0,
-        type: 0,
-        mode: 0,
-        value: 0
+        type: 'output',
+        pin: 5,
+        signal: 'digital',
+        data: 'off'
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -245,7 +242,7 @@ function updateBehavior(options) {
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "id=" + options['id'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&mode=" + options['mode'] + "&value=" + options['value'] + "";
+    var params = "id=" + options['id'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&value=" + options['value'] + "";
     url = url.concat('?', params);
     
     http.open("PUT", url, true);

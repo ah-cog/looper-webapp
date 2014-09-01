@@ -206,6 +206,27 @@ function setupGestures(device) {
             }
         }
 
+        if (!disableEventCreate) {
+            disableEventCreate = true;
+
+            var touches = ev.gesture.touches;
+
+            if (device.processing.behaviorPalette == null) {
+                console.log("looperInstance = ");
+                console.log(device.processing.looperInstance);
+                device.processing.behaviorPalette = new BehaviorPalette({ looperInstance: device });
+                device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+                device.processing.behaviorPalette.updatePosition();
+                device.processing.setupBehaviorPalette();
+                console.log(device.processing.behaviorPalette);
+            }
+
+            // Show behavior palette
+            // device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+            device.processing.behaviorPalette.show();
+            console.log(device.processing.behaviorPalette);
+        }
+
         ev.gesture.preventDefault();
         ev.stopPropagation();
         ev.gesture.stopPropagation();
@@ -246,27 +267,6 @@ function setupGestures(device) {
                 interfaces[i].events.release();
                 break;
             }
-        }
-
-        if (!disableEventCreate) {
-            disableEventCreate = true;
-
-            var touches = ev.gesture.touches;
-
-            if (device.processing.behaviorPalette == null) {
-                console.log("looperInstance = ");
-                console.log(device.processing.looperInstance);
-                device.processing.behaviorPalette = new BehaviorPalette({ looperInstance: device });
-                device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
-                device.processing.behaviorPalette.updatePosition();
-                device.processing.setupBehaviorPalette();
-                console.log(device.processing.behaviorPalette);
-            }
-
-            // Show behavior palette
-            // device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
-            device.processing.behaviorPalette.show();
-            console.log(device.processing.behaviorPalette);
         }
 
         ev.gesture.preventDefault();

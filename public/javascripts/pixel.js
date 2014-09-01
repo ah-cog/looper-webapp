@@ -171,7 +171,12 @@ function createBehavior(options) {
     //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "type=" + options['type'] + "&pin=" + options['pin'] + "&signal=" + options['signal'] + "&data=" + options['data'];
+    var params = "";
+    if (options['type'] == "input" || options['type'] == "output") {
+        params = "type=" + options['type'] + "&pin=" + options['pin'] + "&signal=" + options['signal'] + "&data=" + options['data'];
+    } else if (options['type'] == "delay") {
+        params = "type=" + options['type'] + "&milliseconds=" + options['milliseconds'];
+    }
     url = url.concat('?', params);
     
     http.open("POST", url, true);

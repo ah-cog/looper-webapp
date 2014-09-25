@@ -167,6 +167,8 @@ function createBehavior(options) {
     var options = options || {};
     var options = $.extend({}, defaults, options);
 
+    // console.log ("Behavior?: " + options.behavior);
+
     var http = new XMLHttpRequest();
     //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
@@ -176,6 +178,8 @@ function createBehavior(options) {
         params = "type=" + options['type'] + "&pin=" + options['pin'] + "&signal=" + options['signal'] + "&data=" + options['data'];
     } else if (options['type'] == "delay") {
         params = "type=" + options['type'] + "&milliseconds=" + options['milliseconds'];
+    } else if (options['type'] == "sound") {
+        params = "type=" + options['type'] + "&note=" + options['note'] + "&duration=" + options['duration'];
     }
     url = url.concat('?', params);
     
@@ -192,14 +196,26 @@ function createBehavior(options) {
         } else if(http.readyState == 4 && http.status == 201) {
             console.log("Behavior created successfully.");
             console.log(http.getResponseHeader('Location'));
+
+            var behaviorUri = http.getResponseHeader ('Location');
+            var behaviorUuid = behaviorUri.split ("/")[2];
+
+            console.log ("UUID: " + behaviorUuid);
+
+            // Update the behavior's UUID
+            options.behavior.uuid = behaviorUuid;
+
+            console.log (options.behavior);
+
+            // TODO: Assign UUID to behavior in Looper for subsequent calls.
         }
     }
     http.send(params);
 }
 
-function getBehavior(options, callback) {
+function getBehavior (options, callback) {
     var defaults = {
-        id: -1
+        uuid: -1
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -207,7 +223,7 @@ function getBehavior(options, callback) {
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "id=" + options['id'];
+    var params = "uuid=" + options['uuid'];
     url = url.concat('?', params);
     
     http.open("GET", url, true);
@@ -222,6 +238,8 @@ function getBehavior(options, callback) {
             console.log("Behavior got successfully.");
             console.log(http.responseText);
 
+            // TODO: Update the behavior's state based on the response behavior data.
+
             // if (callback !== undefined) {
             //     callback(); // The callback function
             // }
@@ -233,9 +251,9 @@ function getBehavior(options, callback) {
     http.send(params);
 }
 
-function updateBehavior(options) {
+function updateBehavior (options) {
     var defaults = {
-        id: -1,
+        uuid: -1,
         type: 'output',
         pin: 5,
         signal: 'digital',
@@ -245,9 +263,17 @@ function updateBehavior(options) {
     var options = $.extend({}, defaults, options);
 
     var http = new XMLHttpRequest();
+    //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "id=" + options['id'] + "&pin=" + options['pin'] + "&operation=" + options['operation'] + "&type=" + options['type'] + "&value=" + options['value'] + "";
+    var params = "";
+    if (options['type'] == "input" || options['type'] == "output") {
+        params = "uuid=" + options['uuid'] + "&pin=" + options['pin'] + "&signal=" + options['signal'] + "&data=" + options['data'];
+    } else if (options['type'] == "delay") {
+        params = "uuid=" + options['uuid'] + "&milliseconds=" + options['milliseconds'];
+    } else if (options['type'] == "sound") {
+        params = "uuid=" + options['uuid'] + "&note=" + options['note'] + "&duration=" + options['duration'];
+    }
     url = url.concat('?', params);
     
     http.open("PUT", url, true);
@@ -269,9 +295,9 @@ function updateBehavior(options) {
     http.send(params);
 }
 
-function deleteBehavior(options) {
+function deleteBehavior (options) {
     var defaults = {
-        id: -1
+        uuid: -1
     };
     var options = options || {};
     var options = $.extend({}, defaults, options);
@@ -279,7 +305,7 @@ function deleteBehavior(options) {
     var http = new XMLHttpRequest();
     var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
     var url = deviceUri.concat("/behavior");
-    var params = "id=" + options['id'] + "";
+    var params = "uuid=" + options['uuid'] + "";
     url = url.concat('?', params);
     
     http.open("DELETE", url, true);
@@ -293,6 +319,7 @@ function deleteBehavior(options) {
         if(http.readyState == 4 && http.status == 200) {
             console.log("Behavior deleted successfully.");
             console.log(http.responseText);
+            // TODO: Update behavior's UUID and state!
         } else if(http.readyState == 4 && http.status == 401) {
             console.log("Behavior NOT deleted.");
             console.log(http.responseText);

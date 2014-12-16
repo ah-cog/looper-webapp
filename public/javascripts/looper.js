@@ -192,7 +192,13 @@ function setupGestures (device) {
             // if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+
+            // Map raw touch coordinates onto the current device's Processing rendering context coordinates
+            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
+            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+
+            //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            if (interfaces[i].touches(newX, newY)) {
                 interfaces[i].events.tap();
                 break;
             }
@@ -207,6 +213,17 @@ function setupGestures (device) {
 
         var touches = ev.gesture.touches;
 
+        console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        console.log (device.processing.mouseY);
+
+        // Save mouse touch location
+        device.processing.mouse_x = (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        device.processing.mouse_y = device.processing.mouseY;
+
+        // Store previous offset
+        device.processing.xOffsetPrevious = device.processing.xOffset;
+        device.processing.yOffsetPrevious = device.processing.yOffset;
+
         // Update the previous touch state history
         // device.touch = { touching: true, holding: false, current: { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY }, touch: { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY } };
         device.touch.touching = true;
@@ -214,18 +231,33 @@ function setupGestures (device) {
         device.touch.current = { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, t: (new Date()).getTime() };
         device.touch.touch = { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, t: (new Date()).getTime() };
 
+        device.processing.draggingCanvas = false; // device.touch.draggingCanvas = false;
+
         // console.log ("here!!");
         // console.log (((ev.gesture.center.pageX - device.processing.centerX) / device.processing.scaleFactor) + device.processing.previousCenterX);
+
+        var touchingCanvas = true;
 
         // Check for interaction with interfaces
         for (var i = 0; i < interfaces.length; i++) {
             console.log(interfaces[i]);
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            // Map raw touch coordinates onto the current device's Processing rendering context coordinates
+            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
+            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+
+            //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            if (interfaces[i].touches (newX, newY)) {
                 interfaces[i].events.touch();
+                touchingCanvas = false; // Flag that an interface is being touched
                 break;
             }
+        }
+
+        if (touchingCanvas) {
+            //device.touch.draggingCanvas = true;
+            device.processing.draggingCanvas = true;
         }
 
         // if (!disableEventCreate) {
@@ -263,6 +295,22 @@ function setupGestures (device) {
 
         var touches = ev.gesture.touches;
 
+        console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        console.log (device.processing.mouseY);
+
+        if (device.processing.draggingCanvas == true) {
+            //device.touch.draggingCanvas = true;
+            device.processing.draggingCanvas = false;
+
+            // Save mouse touch location
+            var currentMouseX = (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+            var currentMouseY = device.processing.mouseY;
+
+            // Store previous offset
+            device.processing.xOffset = currentMouseX - device.processing.mouse_x + device.processing.xOffsetPrevious;
+            device.processing.yOffset = currentMouseY - device.processing.mouse_y + device.processing.yOffsetPrevious;
+        }
+
         // Update the previous touch state history
         // device.touch = { touching: false, holding: false, current: { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY }, release: { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY } };
         device.touch.touching = false;
@@ -276,7 +324,12 @@ function setupGestures (device) {
             // if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            // Map raw touch coordinates onto the current device's Processing rendering context coordinates
+            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
+            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+
+            //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            if (interfaces[i].touches(newX, newY)) {
                 interfaces[i].events.release();
                 break;
             }
@@ -305,12 +358,22 @@ function setupGestures (device) {
         device.touch.holding = true;
         device.touch.current = { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, t: (new Date()).getTime() };
 
+        // If the canvas is being dragged, cancel the drag since a hold is detected
+        if (device.processing.draggingCanvas) {
+            device.processing.draggingCanvas = false;
+        }
+
         for (var i = 0; i < interfaces.length; i++) {
             console.log(interfaces[i]);
             // if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-            if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            // Map raw touch coordinates onto the current device's Processing rendering context coordinates
+            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
+            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+
+            //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
+            if (interfaces[i].touches(newX, newY)) {
                 //looper.interfaces[i].events.hold();
                 interfaces[i].events.release ();
                 break;
@@ -331,10 +394,16 @@ function setupGestures (device) {
                 device.processing.behaviorPalette = new BehaviorPalette ({ superstructure: device });
                 // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
                 // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-                device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
-                device.processing.behaviorPalette.updatePosition();
-                device.processing.setupBehaviorPalette();
-                console.log(device.processing.behaviorPalette);
+                //device.processing.behaviorPalette.setPosition(ev.gesture.center.pageX, ev.gesture.center.pageY);
+                //device.processing.mouse_x = (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+                //device.processing.mouse_y = device.processing.mouseY;
+                console.log("MAKING BEHAVIOR PALETTE AT: ");
+                console.log (device.processing.mouse_x);
+                console.log (device.processing.mouseY);
+                device.processing.behaviorPalette.setPosition (device.processing.mouse_x - ($(window).width() / 2), device.processing.mouseY - ($(window).height() / 2));
+                device.processing.behaviorPalette.updatePosition ();
+                device.processing.setupBehaviorPalette ();
+                console.log (device.processing.behaviorPalette);
 
                 // Center behavior palette on screen and zoom in on it
                 // looper.zoomIn ({ x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, factor: 2.0 });
@@ -1058,8 +1127,15 @@ function BehaviorPalette (options) {
             yTarget: options.y,
 
             touches: function (x, y) {
+                console.log ("touches");
+                console.log ("x: " + x + ", y: " + y);
+                console.log ("x': " + (x - $(window).width() / 2) + ", y': " + (y - ($(window).height() / 2)));
+                console.log ("this.x: " + this.x + ", this.y: " + this.y);
                 var radius = 50;
                 console.log(x, y, this.x, this.y);
+                console.log ("structure:");
+                console.log (this.structure);
+                console.log (this.structure.superstructure);
                 if ((this.x - radius < x && this.x + radius > x) && (this.y - radius < y && this.y + radius > y)) {
                 // if ((x - radius < this.processing.behaviorPalette.x + this.x && this.processing.behaviorPalette.x + this.x < x + radius)
                 //     && (y - radius < this.processing.behaviorPalette.y + this.y && this.processing.behaviorPalette.y + this.y < y + radius)) {
@@ -1148,9 +1224,15 @@ function BehaviorPalette (options) {
                     if (behavior.state === 'MOVING') {
 
                         // Standard update for a moving event
-                        currentMouseX = behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX;
+                        currentMouseX = (behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX) - (behavior.interface.processing.screenWidth / 2);
+                        currentMouseY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
+
+                        console.log ("MIXEE");
+                        console.log (behavior.interface.processing.mouseX);
+                        console.log (behavior.interface.processing.mouseY);
+
                         behavior.interface.x = currentMouseX;
-                        behavior.interface.y = behavior.interface.processing.mouseY;
+                        behavior.interface.y = currentMouseY;
 
                         // behavior.interface.x = ((behavior.interface.x - behavior.interface.processing.previousCenterX) / behavior.interface.processing.scaleFactor) + behavior.interface.processing.centerX;
                         // behavior.interface.y = ((behavior.interface.y - behavior.interface.processing.previousCenterY) / behavior.interface.processing.scaleFactor) + behavior.interface.processing.centerY;
@@ -1841,7 +1923,7 @@ function LooperInstance (options) {
             // Add "default" behaviors to palette
             processing.behaviorPalette.addBehavior ({
                 type: 'light',
-                label: 'light on',
+                label: 'on',
 
                 x: processing.behaviorPalette.x + -100,
                 y: processing.behaviorPalette.y + 0,
@@ -1878,22 +1960,43 @@ function LooperInstance (options) {
                 }
             });
 
+            // processing.behaviorPalette.addBehavior ({
+            //     type: 'sound',
+            //     label: 'sound',
+
+            //     x: processing.behaviorPalette.x + 0,
+            //     y: processing.behaviorPalette.y + 0,
+
+            //     procedure: function(options) {
+            //         console.log('sound on top level');
+            //         // setPin(options);
+            //         // createBehavior ({ type: 'output' });
+            //         createBehavior (options);
+            //         // TODO: Keep track of state... has this been sent yet?
+            //     },
+            //     options: {
+            //         type: 'sound', note: '1047', duration: '500'
+            //         // index: -1, type: 'output', pin: 5, operation: 1, type: 0, mode: 1, value: 1
+            //     }
+            // });
+
             processing.behaviorPalette.addBehavior ({
-                type: 'sound',
-                label: 'sound',
+                type: 'light',
+                label: 'off',
 
                 x: processing.behaviorPalette.x + 0,
                 y: processing.behaviorPalette.y + 0,
 
                 procedure: function(options) {
-                    console.log('sound on top level');
+                    console.log('light off top level');
                     // setPin(options);
                     // createBehavior ({ type: 'output' });
                     createBehavior (options);
                     // TODO: Keep track of state... has this been sent yet?
                 },
                 options: {
-                    type: 'sound', note: '1047', duration: '500'
+                    type: 'output',
+                    data: 'off'
                     // index: -1, type: 'output', pin: 5, operation: 1, type: 0, mode: 1, value: 1
                 }
             });
@@ -1918,16 +2021,65 @@ function LooperInstance (options) {
             // });
         }
 
+        processing.keyPressed = function() {
+            // console.log ("keyPressed " + processing.key);
+
+            if (processing.key == 101) { // e
+                console.log ("zoom in");
+                processing.zoomFactor += 0.1;
+            } else if (processing.key == 113) { // q
+                console.log ("zoom out");
+                processing.zoomFactor -= 0.1;
+            } else if (processing.key == 119) { // w
+                console.log ("pan up");
+
+                // mouse = new PVector(mouseX, mouseY);
+                // poffset.set(offset);
+                processing.mouse_x = processing.mouseX;
+                processing.mouse_y = processing.mouseY;
+                processing.xOffsetPrevious = processing.xOffset;
+                processing.yOffsetPrevious = processing.yOffset;
+
+                // offset.x = mouseX - mouse.x + poffset.x;
+                // offset.y = mouseY - mouse.y + poffset.y;
+                processing.yOffset = 10 + processing.yOffsetPrevious;
+
+                console.log (processing.yOffset);
+
+            } else if (processing.key == 97) { // a
+                console.log ("pan left");
+            } else if (processing.key == 115) { // s
+                console.log ("pan down");
+
+                // mouse = new PVector(mouseX, mouseY);
+                // poffset.set(offset);
+                processing.mouse_x = processing.mouseX;
+                processing.mouse_y = processing.mouseY;
+                processing.xOffsetPrevious = processing.xOffset;
+                processing.yOffsetPrevious = processing.yOffset;
+
+                // offset.x = mouseX - mouse.x + poffset.x;
+                // offset.y = mouseY - mouse.y + poffset.y;
+                processing.yOffset = -10 + processing.yOffsetPrevious;
+            } else if (processing.key == 100) { // d
+                console.log ("pan right");
+            }
+        }
+
         /**
          * Override setup function.
          */
         processing.setup = function() {
-            this.size(this.screenWidth, this.screenHeight);
+            this.size (this.screenWidth, this.screenHeight);
 
             this.font = this.loadFont("/DidactGothic.ttf");
 
             processing.xOrigin = 0.0;
             processing.yOrigin = 0.0;
+            processing.xOffset = 0.0;
+            processing.yOffset = 0.0;
+            processing.xOffsetPrevious = 0.0;
+            processing.yOffsetPrevious = 0.0;
             // processing.translate (processing.xOrigin, processing.yOrigin);
             // processing.scale (processing.scaleOrigin);
 
@@ -1950,21 +2102,28 @@ function LooperInstance (options) {
 
         processing.drawLoop = function() {
 
-            this.pushMatrix();
-
-            // this.translate (0, 0);
+            // // Everything must be drawn relative to center
+            // this.translate (this.screenWidth / 2, this.screenHeight / 2);
+            // // Use scale for 2D "zoom"
+            // this.scale (this.zoomFactor);
+            // // The offset (note how we scale according to the zoom)
+            // this.translate (this.xOffset/this.zoomFactor, this.yOffset/this.zoomFactor);
 
             // var scale = 1.3;
             // this.scale(scale);
             // // console.log ((((this.screenWidth * scale) - this.screenWidth) / 2));
             // this.translate (((this.screenWidth - (this.screenWidth * scale)) / 2), 0);
 
+            this.pushMatrix();
+
             // Draw the loop
             this.strokeWeight (1.0);
             this.stroke (65, 65, 65);
             this.noFill ();
             this.smooth ();
-            this.arc (this.screenWidth / 2, this.screenHeight / 2, 400, 400, (-this.PI / 2) + 0.05 * this.PI, 1.45 * this.PI);
+            this.arc (0, 0, 400, 400, (-this.PI / 2) + 0.05 * this.PI, 1.45 * this.PI);
+
+            this.popMatrix();
 
             // Highlight a section of the arc
             /*
@@ -1977,10 +2136,12 @@ function LooperInstance (options) {
             processing.arc(processing.screenWidth / 2, processing.screenHeight / 2, 400, 400, (-processing.PI/2) + ((offset + 0.05) * processing.PI), (-processing.PI/2) + ((offset + 0.05 + length) * processing.PI));
             */
 
+            this.pushMatrix();
+
             // Draw the loop's arrowhead to indicate its sequence order
             this.strokeWeight(1.0);
             this.stroke(65, 65, 65);
-            this.translate(this.screenWidth / 2, this.screenHeight / 2);
+            // this.translate(this.screenWidth / 2, this.screenHeight / 2);
             this.translate(-29, -198);
             this.rotate(-0.05 * this.PI);
             this.line(0, 0, -16, 16);
@@ -1993,6 +2154,31 @@ function LooperInstance (options) {
          * Override draw function. By default, it will be called 60 times per second.
          */
         processing.draw = function() {
+
+            // Check if canvas is being dragged
+            // TODO: Move this into the canvas object's "on drag" callback (which has yet to be made)
+            if (this.draggingCanvas === true) {
+
+                // Save mouse touch location
+                var currentMouseX = (((looper.getCurrentPane() + 1) * $(window).width()) + this.mouseX);
+                var currentMouseY = this.mouseY;
+
+                // Store previous offset
+                this.xOffset = currentMouseX - this.mouse_x + this.xOffsetPrevious;
+                this.yOffset = currentMouseY - this.mouse_y + this.yOffsetPrevious;
+            }
+
+
+
+
+            this.pushMatrix();
+
+            // Everything must be drawn relative to center
+            this.translate (this.screenWidth / 2, this.screenHeight / 2);
+            // Use scale for 2D "zoom"
+            this.scale (this.zoomFactor);
+            // The offset (note how we scale according to the zoom)
+            this.translate (this.xOffset/this.zoomFactor, this.yOffset/this.zoomFactor);
 
             // // Update the previous touch state history
             // console.log (looper.getCurrentDevice().touch.touch);
@@ -2014,9 +2200,9 @@ function LooperInstance (options) {
 
 
 
-            this.xOrigin = 0;
-            this.yOrigin = 0;
-            this.translate (this.xOrigin, this.yOrigin);
+            // this.xOrigin = 0;
+            // this.yOrigin = 0;
+            // this.translate (this.xOrigin, this.yOrigin);
 
             /**
              * Draw behaviors.
@@ -2198,6 +2384,8 @@ function LooperInstance (options) {
             this.drawLoop(); // TODO: Make Interface for this! Then remove!
 
             drawInterfaces();
+
+            this.popMatrix();
         };
     });
 

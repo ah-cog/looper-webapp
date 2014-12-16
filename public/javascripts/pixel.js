@@ -71,6 +71,55 @@
 //     http.send(params);
 // }
 
+// TODO: function pin(index, pin, operation, type, mode, value) { /* ... */ }
+//function pin(index, pin, operation, type, mode, value) {
+function message (options) { // function text (options) {
+    var defaults = {
+        content: ""
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    var http = new XMLHttpRequest();
+    //var deviceUri = "http://" + deviceAddresses[looper.getCurrentPane()];
+    var deviceUri = "http://" + looper.devices[looper.getCurrentPane()].address;
+    var url = deviceUri.concat ("/message");
+    var params = "content=" + options['content'];
+    url = url.concat ('?', params);
+    
+    http.open("POST", url, true);
+
+    // Send the proper header information along with the request
+    http.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    // http.setRequestHeader('Access-Control-Allow-Origin', '*');
+    http.setRequestHeader('X-PINGOTHER', 'pingpong');
+    
+    http.onreadystatechange = function() { // Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+           console.log(http.responseText);
+        } else if(http.readyState == 4 && http.status == 201) {
+            console.log("Message successfully sent.");
+
+            // TODO: Get response from message
+
+            // console.log(http.getResponseHeader('Location'));
+
+            // var behaviorUri = http.getResponseHeader ('Location');
+            // var behaviorUuid = behaviorUri.split ("/")[2];
+
+            // console.log ("UUID: " + behaviorUuid);
+
+            // // Update the behavior's UUID
+            // options.behavior.uuid = behaviorUuid;
+
+            // console.log (options.behavior);
+
+            // TODO: Assign UUID to behavior in Looper for subsequent calls.
+        }
+    }
+    http.send(params);
+}
+
 /**
  * Send a GET request to the specified address.
  */

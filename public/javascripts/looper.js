@@ -93,12 +93,12 @@ function Carousel(element) {
 
 
 
-    function handleHammer(ev) {
+    function handleHammer (ev) {
         // console.log(ev);
         // disable browser scrolling
         ev.gesture.preventDefault();
 
-        if (!disableEventCreate) {
+        if (!disableEventCreate && !looper.getCurrentDevice().processing.draggingCanvas) {
 
             switch(ev.type) {
                 case 'dragright':
@@ -295,8 +295,23 @@ function setupGestures (device) {
 
         var touches = ev.gesture.touches;
 
-        console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
-        console.log (device.processing.mouseY);
+        console.log ("Processing (mouseX, mouseY): " + device.processing.mouseX + ", " + device.processing.mouseY);
+
+        // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        // console.log (device.processing.mouseY);
+
+        var screenMouseX = ((looper.getCurrentPane() + 1) * device.processing.screenWidth) + device.processing.mouseX;
+        var screenMouseY = device.processing.mouseY;
+        console.log ("Screen (mouseX, mouseY), calculated: " + screenMouseX + ", " + screenMouseY);
+
+        var canvasMouseX = ((looper.getCurrentPane()) * device.processing.screenWidth) + device.processing.mouseX + (device.processing.xOffsetOrigin);
+        var canvasMouseY = device.processing.mouseY - (device.processing.yOffsetOrigin);
+        console.log ("Canvas (mouseX, mouseY), calculated: " + canvasMouseX + ", " + canvasMouseY);
+
+        console.log ("zoomFactor: " + device.processing.zoomFactor);
+        var pannedCanvasMouseX = (1 + (1 - device.processing.zoomFactor)) * (((looper.getCurrentPane()) * device.processing.screenWidth) + (device.processing.mouseX + device.processing.xOffsetOrigin - device.processing.xOffset));
+        var pannedCanvasMouseY = (1 + (1 - device.processing.zoomFactor)) *  (device.processing.mouseY - (device.processing.yOffsetOrigin) - (device.processing.yOffset));
+        console.log ("Panned canvas (mouseX, mouseY), calculated: " + pannedCanvasMouseX + ", " + pannedCanvasMouseY);
 
         if (device.processing.draggingCanvas == true) {
             //device.touch.draggingCanvas = true;
@@ -1167,6 +1182,8 @@ function BehaviorPalette (options) {
                 if (behavior.state === 'MOVING') {
 
                     var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop (behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
+
+                    console.log ("Nearest Position: " + nearestPosition.x + ", " + nearestPosition.y);
                     
                     behavior.interface.xTarget = nearestPosition.x;
                     behavior.interface.yTarget = nearestPosition.y;
@@ -2074,8 +2091,11 @@ function LooperInstance (options) {
 
             this.font = this.loadFont("/DidactGothic.ttf");
 
-            processing.xOrigin = 0.0;
-            processing.yOrigin = 0.0;
+            this.xOffsetOrigin = this.screenWidth / 2;
+            this.yOffsetOrigin = this.screenHeight / 2;
+
+            // processing.xOrigin = 0.0;
+            // processing.yOrigin = 0.0;
             processing.xOffset = 0.0;
             processing.yOffset = 0.0;
             processing.xOffsetPrevious = 0.0;
@@ -2174,7 +2194,7 @@ function LooperInstance (options) {
             this.pushMatrix();
 
             // Everything must be drawn relative to center
-            this.translate (this.screenWidth / 2, this.screenHeight / 2);
+            this.translate (this.xOffsetOrigin, this.yOffsetOrigin);
             // Use scale for 2D "zoom"
             this.scale (this.zoomFactor);
             // The offset (note how we scale according to the zoom)
@@ -2323,7 +2343,7 @@ function LooperInstance (options) {
             /**
              * Get the angle.
              */
-            function getAngle(x, y) {
+            function getAngle (x, y) {
                 var deltaX = x - (processing.screenWidth / 2);
                 var deltaY = y - (processing.screenHeight / 2);
                 var angleInRadians = Math.atan2(deltaY, deltaX); // * 180 / PI;
@@ -2341,13 +2361,18 @@ function LooperInstance (options) {
             /**
              * Returns the coordinates for the point on the loop nearest to the specified point.
              */
-            function getNearestPositionOnEventLoop(x, y) {
+            function getNearestPositionOnEventLoop (x, y) {
+                // x = x + processing.screenWidth;
+                console.log ("Get nearest to: " + x + ", " + y);
+
                 var deltaX = x - (processing.screenWidth / 2);
                 var deltaY = y - (processing.screenHeight / 2);
                 var angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
 
-                var nearestX = processing.screenWidth / 2 + (400 / 2) * Math.cos (angleInDegrees);
-                var nearestY = processing.screenHeight / 2 + (400 / 2) * Math.sin (angleInDegrees);
+                // var nearestX = processing.screenWidth / 2 + (400 / 2) * Math.cos (angleInDegrees);
+                // var nearestY = processing.screenHeight / 2 + (400 / 2) * Math.sin (angleInDegrees);
+                var nearestX = 0 + (400 / 2) * Math.cos (angleInDegrees);
+                var nearestY = 0 + (400 / 2) * Math.sin (angleInDegrees);
 
                 var nearestPosition = {
                     x: nearestX,

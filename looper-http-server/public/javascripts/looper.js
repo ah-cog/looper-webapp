@@ -8,7 +8,7 @@ showPalette = false;
 * super simple carousel
 * animation between panes happens with css transitions
 */
-function Carousel(element) {
+function Carousel (element) {
     var self = this;
     element = $(element);
 
@@ -194,8 +194,8 @@ function setupGestures (device) {
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
 
             // Map raw touch coordinates onto the current device's Processing rendering context coordinates
-            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
-            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+            var newX = device.processing.zoomedCanvasMouseX; // (ev.gesture.center.pageX - $(window).width() / 2) - device.processing.xOffset;
+            var newY = device.processing.zoomedCanvasMouseY; // (ev.gesture.center.pageY - ($(window).height() / 2)) - device.processing.yOffset;
 
             //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             if (interfaces[i].touches(newX, newY)) {
@@ -210,6 +210,8 @@ function setupGestures (device) {
      */
     $(currentCanvas).hammer({ drag_max_touches: 0 }).on ("touch", function(ev) {
         console.log("'touch' event!");
+
+        device.processing.processGesture (ev);
 
         var touches = ev.gesture.touches;
 
@@ -244,8 +246,8 @@ function setupGestures (device) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
             // Map raw touch coordinates onto the current device's Processing rendering context coordinates
-            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
-            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+            var newX = device.processing.zoomedCanvasMouseX; // (ev.gesture.center.pageX - $(window).width() / 2) - device.processing.xOffset;
+            var newY = device.processing.zoomedCanvasMouseY; // (ev.gesture.center.pageY - ($(window).height() / 2) - device.processing.yOffset);
 
             //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             if (interfaces[i].touches (newX, newY)) {
@@ -293,25 +295,28 @@ function setupGestures (device) {
     $(currentCanvas).hammer({ drag_max_touches: 0 }).on("release", function(ev) {
         console.log("'release' event!");
 
+        device.processing.processGesture (ev);
+        // i.e., save, process
+
         var touches = ev.gesture.touches;
 
-        console.log ("Processing (mouseX, mouseY): " + device.processing.mouseX + ", " + device.processing.mouseY);
+        // console.log ("Processing (mouseX, mouseY): " + device.processing.mouseX + ", " + device.processing.mouseY);
 
-        // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
-        // console.log (device.processing.mouseY);
+        // // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        // // console.log (device.processing.mouseY);
 
-        var screenMouseX = ((looper.getCurrentPane() + 1) * device.processing.screenWidth) + device.processing.mouseX;
-        var screenMouseY = device.processing.mouseY;
-        console.log ("Screen (mouseX, mouseY), calculated: " + screenMouseX + ", " + screenMouseY);
+        // var screenMouseX = ((looper.getCurrentPane() + 1) * device.processing.screenWidth) + device.processing.mouseX;
+        // var screenMouseY = device.processing.mouseY;
+        // console.log ("Screen (mouseX, mouseY), calculated: " + screenMouseX + ", " + screenMouseY);
 
-        var canvasMouseX = ((looper.getCurrentPane()) * device.processing.screenWidth) + device.processing.mouseX + (device.processing.xOffsetOrigin);
-        var canvasMouseY = device.processing.mouseY - (device.processing.yOffsetOrigin);
-        console.log ("Canvas (mouseX, mouseY), calculated: " + canvasMouseX + ", " + canvasMouseY);
+        // var canvasMouseX = ((looper.getCurrentPane()) * device.processing.screenWidth) + device.processing.mouseX + (device.processing.xOffsetOrigin);
+        // var canvasMouseY = device.processing.mouseY - (device.processing.yOffsetOrigin);
+        // console.log ("Canvas (mouseX, mouseY), calculated: " + canvasMouseX + ", " + canvasMouseY);
 
-        console.log ("zoomFactor: " + device.processing.zoomFactor);
-        var pannedCanvasMouseX = (1 + (1 - device.processing.zoomFactor)) * (((looper.getCurrentPane()) * device.processing.screenWidth) + (device.processing.mouseX + device.processing.xOffsetOrigin - device.processing.xOffset));
-        var pannedCanvasMouseY = (1 + (1 - device.processing.zoomFactor)) *  (device.processing.mouseY - (device.processing.yOffsetOrigin) - (device.processing.yOffset));
-        console.log ("Panned canvas (mouseX, mouseY), calculated: " + pannedCanvasMouseX + ", " + pannedCanvasMouseY);
+        // console.log ("zoomFactor: " + device.processing.zoomFactor);
+        // var pannedCanvasMouseX = (1 + (1 - device.processing.zoomFactor)) * (((looper.getCurrentPane()) * device.processing.screenWidth) + (device.processing.mouseX + device.processing.xOffsetOrigin - device.processing.xOffset));
+        // var pannedCanvasMouseY = (1 + (1 - device.processing.zoomFactor)) *  (device.processing.mouseY - (device.processing.yOffsetOrigin) - (device.processing.yOffset));
+        // console.log ("Panned canvas (mouseX, mouseY), calculated: " + pannedCanvasMouseX + ", " + pannedCanvasMouseY);
 
         if (device.processing.draggingCanvas == true) {
             //device.touch.draggingCanvas = true;
@@ -340,8 +345,8 @@ function setupGestures (device) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
             // Map raw touch coordinates onto the current device's Processing rendering context coordinates
-            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
-            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+            var newX = device.processing.zoomedCanvasMouseX; // (ev.gesture.center.pageX - $(window).width() / 2) - device.processing.xOffset;
+            var newY = device.processing.zoomedCanvasMouseY; // (ev.gesture.center.pageY - ($(window).height() / 2) - device.processing.yOffset);
 
             //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             if (interfaces[i].touches(newX, newY)) {
@@ -367,6 +372,44 @@ function setupGestures (device) {
     $(currentCanvas).hammer ({ drag_max_touches: 0, hold_timeout: 200 }).on ("hold", function (ev) {
         console.log("'hold' event!");
 
+        device.processing.processGesture (ev);
+
+        var touches = ev.gesture.touches;
+
+        console.log ("Processing (mouseX, mouseY): " + device.processing.mouseX + ", " + device.processing.mouseY);
+
+        // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+        // console.log (device.processing.mouseY);
+
+        // var screenMouseX = ((looper.getCurrentPane() + 1) * device.processing.screenWidth) + device.processing.mouseX;
+        // var screenMouseY = device.processing.mouseY;
+        // console.log ("Screen (mouseX, mouseY), calculated: " + screenMouseX + ", " + screenMouseY);
+
+        // var canvasMouseX = ((looper.getCurrentPane()) * device.processing.screenWidth) + device.processing.mouseX + (device.processing.xOffsetOrigin);
+        // var canvasMouseY = device.processing.mouseY - (device.processing.yOffsetOrigin);
+        // console.log ("Canvas (mouseX, mouseY), calculated: " + canvasMouseX + ", " + canvasMouseY);
+
+        // console.log ("zoomFactor: " + device.processing.zoomFactor);
+        // var pannedCanvasMouseX = (1 + (1 - device.processing.zoomFactor)) * (((looper.getCurrentPane()) * device.processing.screenWidth) + (device.processing.mouseX + device.processing.xOffsetOrigin - device.processing.xOffset));
+        // var pannedCanvasMouseY = (1 + (1 - device.processing.zoomFactor)) *  (device.processing.mouseY - (device.processing.yOffsetOrigin) - (device.processing.yOffset));
+        // console.log ("Panned canvas (mouseX, mouseY), calculated: " + pannedCanvasMouseX + ", " + pannedCanvasMouseY);
+
+        if (device.processing.draggingCanvas == true) {
+            //device.touch.draggingCanvas = true;
+            device.processing.draggingCanvas = false;
+
+            // Save mouse touch location
+            var currentMouseX = (((looper.getCurrentPane() + 1) * $(window).width()) + device.processing.mouseX);
+            var currentMouseY = device.processing.mouseY;
+
+            // Store previous offset
+            device.processing.xOffset = currentMouseX - device.processing.mouse_x + device.processing.xOffsetPrevious;
+            device.processing.yOffset = currentMouseY - device.processing.mouse_y + device.processing.yOffsetPrevious;
+        }
+
+
+
+
         // Update the previous touch state history
         // device.touch = { touching: true, holding: true, current: { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY } };
         device.touch.touching = true;
@@ -384,8 +427,8 @@ function setupGestures (device) {
             // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
             // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
             // Map raw touch coordinates onto the current device's Processing rendering context coordinates
-            var newX = (ev.gesture.center.pageX - $(window).width() / 2);
-            var newY = (ev.gesture.center.pageY - ($(window).height() / 2));
+            var newX = device.processing.zoomedCanvasMouseX; // (ev.gesture.center.pageX - $(window).width() / 2) - device.processing.xOffset;
+            var newY = device.processing.zoomedCanvasMouseY; // (ev.gesture.center.pageY - ($(window).height() / 2) - device.processing.yOffset);
 
             //if (interfaces[i].touches(ev.gesture.center.pageX, ev.gesture.center.pageY)) {
             if (interfaces[i].touches(newX, newY)) {
@@ -415,7 +458,8 @@ function setupGestures (device) {
                 console.log("MAKING BEHAVIOR PALETTE AT: ");
                 console.log (device.processing.mouse_x);
                 console.log (device.processing.mouseY);
-                device.processing.behaviorPalette.setPosition (device.processing.mouse_x - ($(window).width() / 2), device.processing.mouseY - ($(window).height() / 2));
+                //device.processing.behaviorPalette.setPosition (device.processing.mouse_x - ($(window).width() / 2) - device.processing.xOffset, device.processing.mouseY - ($(window).height() / 2) - device.processing.yOffset);
+                device.processing.behaviorPalette.setPosition (device.processing.zoomedCanvasMouseX, device.processing.zoomedCanvasMouseY);
                 device.processing.behaviorPalette.updatePosition ();
                 device.processing.setupBehaviorPalette ();
                 console.log (device.processing.behaviorPalette);
@@ -1181,7 +1225,9 @@ function BehaviorPalette (options) {
                 // Update the behavior's position if it's moving
                 if (behavior.state === 'MOVING') {
 
-                    var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop (behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
+                    var mouseX = behavior.interface.processing.zoomedCanvasMouseX; // behavior.interface.processing.mouseX - (behavior.interface.processing.screenWidth / 2); // - behavior.interface.processing.xOffset;
+                    var mouseY = behavior.interface.processing.zoomedCanvasMouseY; // behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2); // - behavior.interface.processing.yOffset;
+                    var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop (mouseX, mouseY);
 
                     console.log ("Nearest Position: " + nearestPosition.x + ", " + nearestPosition.y);
                     
@@ -1241,15 +1287,16 @@ function BehaviorPalette (options) {
                     if (behavior.state === 'MOVING') {
 
                         // Standard update for a moving event
+                        // TODO: Update this code to use existing calculated mouse coordinates
                         currentMouseX = (behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX) - (behavior.interface.processing.screenWidth / 2);
                         currentMouseY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
 
-                        console.log ("MIXEE");
-                        console.log (behavior.interface.processing.mouseX);
-                        console.log (behavior.interface.processing.mouseY);
+                        // console.log ("MIXEE");
+                        // console.log (behavior.interface.processing.mouseX);
+                        // console.log (behavior.interface.processing.mouseY);
 
-                        behavior.interface.x = currentMouseX;
-                        behavior.interface.y = currentMouseY;
+                        behavior.interface.x = (currentMouseX - behavior.interface.processing.xOffset) / behavior.interface.processing.zoomFactor;
+                        behavior.interface.y = (currentMouseY - behavior.interface.processing.yOffset) / behavior.interface.processing.zoomFactor;
 
                         // behavior.interface.x = ((behavior.interface.x - behavior.interface.processing.previousCenterX) / behavior.interface.processing.scaleFactor) + behavior.interface.processing.centerX;
                         // behavior.interface.y = ((behavior.interface.y - behavior.interface.processing.previousCenterY) / behavior.interface.processing.scaleFactor) + behavior.interface.processing.centerY;
@@ -2361,13 +2408,16 @@ function LooperInstance (options) {
             /**
              * Returns the coordinates for the point on the loop nearest to the specified point.
              */
-            function getNearestPositionOnEventLoop (x, y) {
+            processing.getNearestPositionOnEventLoop = function (x, y) {
                 // x = x + processing.screenWidth;
                 console.log ("Get nearest to: " + x + ", " + y);
 
-                var deltaX = x - (processing.screenWidth / 2);
-                var deltaY = y - (processing.screenHeight / 2);
-                var angleInDegrees = Math.atan2(deltaY, deltaX); // * 180 / PI;
+                var xPositionOfLoop = 0 + processing.xOffset;
+                var yPositionOfLoop = 0 + processing.yOffset;
+                console.log ("LOOP(x,y) = " + xPositionOfLoop + ", " + yPositionOfLoop);
+                var deltaX = x - xPositionOfLoop; // x difference between specified point and center of loop
+                var deltaY = y - yPositionOfLoop; // y difference between specified point and center of loop
+                var angleInDegrees = Math.atan2 (deltaY, deltaX); // * 180 / PI;
 
                 // var nearestX = processing.screenWidth / 2 + (400 / 2) * Math.cos (angleInDegrees);
                 // var nearestY = processing.screenHeight / 2 + (400 / 2) * Math.sin (angleInDegrees);
@@ -2380,16 +2430,69 @@ function LooperInstance (options) {
                 };
                 return nearestPosition;
             }
-            processing.getNearestPositionOnEventLoop = getNearestPositionOnEventLoop;
 
             /**
              * Get the distance to the loop from the given node.
              */
             processing.getDistanceFromEventLoop = function(loopBehavior) {
-                console.log("getDistanceFromEventLoop");
-                console.log(loopBehavior);
+                // console.log("getDistanceFromEventLoop");
+                // console.log(loopBehavior);
                 var distance = processing.lineDistance(loopBehavior.x, loopBehavior.y, loopBehavior.xTarget, loopBehavior.yTarget);
+                console.log ("Distance from loop: " + distance)
                 return distance;
+            }
+
+            // TODO: Rename to processScreenGesture
+            // TODO: Consider renaming to senseScreenGesture or something else replacing the word "process" to something more appropriate
+            processing.processGesture = function (event) {
+                console.log ("processGesture");
+
+                // TODO:
+                // Ensure the following exist:
+                //    processing.view = {}
+                //    processing.interactions
+
+                var touches = event.gesture.touches;
+
+                console.log ("Processing (mouseX, mouseY): " + processing.mouseX + ", " + processing.mouseY);
+
+                // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + processing.mouseX);
+                // console.log (processing.mouseY);
+
+                // { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, t: (new Date()).getTime() }
+                processing.screenMouseX = event.gesture.center.pageX; // ((looper.getCurrentPane() + 1) * processing.screenWidth) + processing.mouseX;
+                processing.screenMouseY = event.gesture.center.pageY; // processing.mouseY;
+                console.log ("Screen (mouseX, mouseY), calculated: " + processing.screenMouseX + ", " + processing.screenMouseY);
+
+                processing.canvasMouseX = processing.screenMouseX - processing.xOffsetOrigin; // ((looper.getCurrentPane()) * processing.screenWidth) + processing.mouseX + (processing.xOffsetOrigin);
+                processing.canvasMouseY = processing.screenMouseY - processing.yOffsetOrigin; // processing.mouseY - (processing.yOffsetOrigin);
+                console.log ("Canvas (mouseX, mouseY), calculated: " + processing.canvasMouseX + ", " + processing.canvasMouseY);
+
+                // console.log ("zoomFactor: " + processing.zoomFactor);
+                processing.pannedCanvasMouseX = processing.canvasMouseX - processing.xOffset; // (1 + (1 - processing.zoomFactor)) * (((looper.getCurrentPane()) * processing.screenWidth) + (processing.mouseX + processing.xOffsetOrigin - processing.xOffset));
+                processing.pannedCanvasMouseY = processing.canvasMouseY - processing.yOffset; // (1 + (1 - processing.zoomFactor)) *  (processing.mouseY - (processing.yOffsetOrigin) - (processing.yOffset));
+                console.log ("Panned canvas (mouseX, mouseY), calculated (no zooming): " + processing.pannedCanvasMouseX + ", " + processing.pannedCanvasMouseY);
+
+                // Calculate canvas coordinates of panned and zoomed point
+                // var inverseZoom = (1 + (1 - processing.zoomFactor));
+                // console.log ("inverseZoom: " + inverseZoom);
+                processing.zoomedCanvasMouseX = (processing.canvasMouseX - processing.xOffset) / processing.zoomFactor; // * processing.zoomFactor; // (1 + (1 - processing.zoomFactor)) * (((looper.getCurrentPane()) * processing.screenWidth) + (processing.mouseX + processing.xOffsetOrigin - processing.xOffset));
+                processing.zoomedCanvasMouseY = (processing.canvasMouseY - processing.yOffset) / processing.zoomFactor; // * processing.zoomFactor; // (1 + (1 - processing.zoomFactor)) *  (processing.mouseY - (processing.yOffsetOrigin) - (processing.yOffset));
+                console.log ("Zoomed and panned canvas (mouseX, mouseY), calculated: " + processing.zoomedCanvasMouseX + ", " + processing.zoomedCanvasMouseY);
+
+                // if (processing.draggingCanvas == true) {
+                //     //touch.draggingCanvas = true;
+                //     processing.draggingCanvas = false;
+
+                //     // Save mouse touch location
+                //     var currentMouseX = (((looper.getCurrentPane() + 1) * $(window).width()) + processing.mouseX);
+                //     var currentMouseY = processing.mouseY;
+
+                //     // Store previous offset
+                //     processing.xOffset = currentMouseX - processing.mouse_x + processing.xOffsetPrevious;
+                //     processing.yOffset = currentMouseY - processing.mouse_y + processing.yOffsetPrevious;
+                // }
+
             }
 
             /**

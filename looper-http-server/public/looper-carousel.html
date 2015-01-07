@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Looper</title>
+
+    <script src="/javascripts/processing.js"></script>
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
+
+    <link href='http://fonts.googleapis.com/css?family=Didact+Gothic' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+
+    <head profile="http://www.w3.org/2005/10/profile">
+    <link rel="icon" type="image/png" href="/favicon.png">
+</head>
+
+<body>
+
+    <!-- NOTE: Hammer.js works without jQuery! -->
+    <!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script> -->
+    <script src="/javascripts/jquery-1.9.1.min.js"></script>
+    <script src="/javascripts/modernizr.js"></script>
+
+    <!--<div id="debug">Log</div>-->
+
+    <!-- Set up carousel -->
+    <div id="carousel">
+        <ul id="panes">
+
+            <li class="pane1">
+                <canvas id="looperCanvas" style="width: 100%; height: 100%;"></canvas>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- Include Hammer.js (for gesture recognition) -->
+    <script src="/javascripts/jquery.hammer.min.js"></script>
+    <script>
+
+    /*
+    var debug_el = $("#debug");
+    function debug(text) {
+        debug_el.text(text);
+    }
+    */
+
+    /**
+     * requestAnimationFrame and cancel polyfill
+     */
+    (function() {
+        var lastTime = 0;
+        var vendors = ['ms', 'moz', 'webkit', 'o'];
+        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+            window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+            window.cancelAnimationFrame =
+                    window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        }
+
+        if (!window.requestAnimationFrame)
+            window.requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+                        timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
+
+        if (!window.cancelAnimationFrame)
+            window.cancelAnimationFrame = function(id) {
+                clearTimeout (id);
+            };
+    }());
+
+    </script>
+
+    <!-- Include Processing.js -->
+    <script type="application/processing" data-processing-target="looperCanvas">
+    /*
+    @pjs
+    crisp=true;
+    font="/DidactGothic.ttf";
+    */
+    PFont primaryFont;
+
+    void setup() {
+        size(screenWidth, screenHeight);
+
+        primaryFont = loadFont("/DidactGothic.ttf");
+    }
+
+    void draw() {
+        background(#ffffff); // background(#F0F1F0);
+        primaryFont = createFont("/DidactGothic.ttf", 32);
+        textFont(primaryFont, 100);
+        textAlign(CENTER);
+        fill(65, 65, 65);
+        text("pixel", screenWidth / 2, screenHeight / 2 + 20);
+    }
+    </script>
+
+    <script src="/javascripts/pixel.js"></script>
+    <script src="/javascripts/looper.js"></script>
+    <script>
+    looper = new Looper();
+    looper.addDevice({ address: "192.168.1.13" });
+    looper.addDevice({ address: "192.168.1.14" });
+    looper.showDeviceByIndex(0);
+    // erase();
+
+
+    // create interface: behavior interface
+    // create interface: slider: dot and line
+    // create interface
+
+// function attachSlider (options) {
+function Slider (options) {
+
+    var defaults = {
+        superstructure: null,
+        xOrigin: 0,
+        yOrigin: 0,
+        xTarget: 100,
+        yTarget: 0,
+        x: 0,
+        y: 0,
+        properties: [], // The properties of the interface that determine the ways of interacting with it
+
+        // // state: 'NONE', // NONE, FLOATING, MOVING, ENTANGLED, SEQUENCED
+        // //visible: true
+        // // go: null,
+        // // going: false,
+        // behaviors: [],
+        // label: '?',
+        // visible: false
+    };
+    var options = options || {};
+    var options = $.extend({}, defaults, options);
+
+    // Validate and copy the options to this class, to be used for creating an interface
+    this.superstructure = options.superstructure;
+
+    // console.log ("WOOO");
+    // console.log (options);
+
+
+    //looper.getCurrentDevice().attachInterface({
+    var newInterface = this.superstructure.interface.attachInterface ({
+
+        structure: null, // looper.getCurrentDevice(),
+
+        properties: options.properties,
+
+        // TODO: HACK! Fix this so the Processing instance is found automatically through the interface hierarchy!
+        processing: looper.getCurrentDevice().processing, // this.looperInstance.processing,
+
+        // The position of an interface is relative to its parent (if any), otherwise, relative to the window (or screen).
+        xOrigin: options.xOrigin, // The origin of the interface's coordinate system along the x axis. This is relative to the parent's position along the x axis.
+        yOrigin: options.yOrigin, // The origin of the interface's coordinate system along the y axis. This is relative to the parent's position along the y axis.
+        xTarget: options.xTarget, // i.e., The desired or final position of the interface along the x axis. This is where the interface will eventually be (e.g., after it is animated into position).
+        yTarget: options.yTarget, // i.e., The desired or final position of the interface along the y axis. This is where the interface will eventually be (e.g., after it is animated into position).
+        x: options.x, // options.x, // was ev.gesture.center.pageX, // i.e., The current actual position of the interface along the x axis. This is updated in the drawing loop and will ultimately be equal to the target x position.
+        y: options.y, // options.y, // was ev.gesture.center.pageY, // i.e., The current actual position of the interface along the y axis. This is updated in the drawing loop and will ultimately be equal to the target y position.
+
+        // minX: 100,
+        // maxX: 300,
+
+        // This function determines whether the specified (x,y) point falls within the bounds of this interface.
+        touches: function (x, y) {
+            // alert (x, y, this.x, this.y);
+            var radius = 50;
+            console.log (x, y, this.x, this.y);
+            if (((this.xOrigin + this.x) - radius < x && (this.xOrigin + this.x) + radius > x) && ((this.yOrigin + this.y) - radius < y && (this.yOrigin + this.y) + radius > y)) {
+            // if ((x - radius < this.processing.behaviorPalette.x + this.x && this.processing.behaviorPalette.x + this.x < x + radius)
+            //     && (y - radius < this.processing.behaviorPalette.y + this.y && this.processing.behaviorPalette.y + this.y < y + radius)) {
+
+                return true;
+            }
+
+            return false;
+        },
+
+        // Updates the state of the interface before drawing
+        update: function () {
+
+        // Set constants
+            this.min = 100;
+            this.max = 300;
+
+            // if (looper.getCurrentDevice ().touch.touching === true) {
+            if (this.down) { // If touched
+
+                // Hide the cursor while sliding
+                // $('html').css('cursor', 'none');
+
+                // console.log ("DOWN");
+
+                currentMouseX = (this.processing.screenWidth * (this.processing.deviceCount + 1) + this.processing.mouseX) - (this.xOrigin);
+                console.log (currentMouseX);
+                if (currentMouseX < this.min) {
+                    currentMouseX = this.min;
+                } else if (currentMouseX > this.max) {
+                    currentMouseX = this.max;
+                }
+
+                // console.log (currentMouseX);
+
+                // this.setPosition (currentMouseX, this.y);
+                // this.setPosition (currentMouseX, this.yOrigin + this.y);
+                this.setPosition (currentMouseX, this.y);
+            } else {
+
+                // Show the mouse cursor
+                // $('html').css('cursor', 'auto');
+
+                // Hide the cursor while sliding
+                // $('html').css('cursor', 'auto');
+            }
+
+            this.updatePosition ();
+
+        },
+
+        draw: function () {
+
+            // // if (this.processing.behaviorPalette.visible) {
+            // if (behavior.state === 'PROTOTYPE') {
+
+                //this.processing.behaviorPalette.updatePosition();
+                // this.processing.updatePosition(behavior);
+
+                this.update ();
+
+                this.processing.pushMatrix();
+
+                // Draw background of widget
+                this.processing.line (this.xOrigin + this.min, this.yOrigin + this.y, this.xOrigin + this.max, this.yOrigin + this.y);
+
+                // Draw the behavior
+                this.processing.fill (66, 214, 146);
+                // this.processing.ellipse (this.xOrigin + this.x, this.yOrigin + this.y, 30, 30);
+                this.processing.ellipse (this.xOrigin + this.x, this.yOrigin + this.y, 30, 30);
+
+                // primaryFont = this.processing.createFont("/DidactGothic.ttf", 32);
+                // this.processing.textFont(primaryFont, 16);
+                // this.processing.textAlign(this.processing.CENTER);
+                // this.processing.fill(65, 65, 65);
+                // this.processing.text(behavior.label, this.x, this.y + 4);
+
+                this.processing.popMatrix();
+
+
+
+                // TODO: Invoke "callback" or "signal" for current state
+                var range = this.max - this.min;
+                var current = this.x - this.min;
+
+                var value = current / range;
+                // console.log (value + "%");
+
+                var scaledMinimum = this.properties.minimum;
+                var scaledMaximum = this.properties.maximum; // 1024;
+                var scaledValue = value * (scaledMaximum - scaledMinimum) + scaledMinimum;
+                this.value = scaledValue;
+                // console.log (scaledValue + " (scaled)");
+
+                // TODO: Send musical note to Pixel via Looper
+
+        },
+
+        events: {
+            tap: function() {
+                console.log("tap!! Behavior");
+
+                // disableEventCreate = true;
+
+                //var nearestPosition = this.processing.getNearestPositionOnEventLoop (this.processing.mouseX, this.processing.mouseY);
+
+                // console.log(this.processing.mouseX);
+                    
+                // this.xTarget = this.processing.mouseX;
+                // this.yTarget = this.processing.mouseY;
+            },
+
+            touch: function() {
+                console.log("touch!! Behavior");
+                console.log (this);
+                console.log (this.interface);
+
+                disableEventCreate = true;
+
+                this.interface.down = true;
+
+                // Hide the mouse cursor
+                $('html').css('cursor', 'none');
+            },
+
+            hold: function () {
+                console.log("hold Behavior");
+            },
+
+            release: function () {
+                console.log("release!! Behavior");
+
+                this.interface.down = false;
+
+                disableEventCreate = false;
+
+                this.interface.properties.interface = this.interface;
+                this.interface.properties.callback ();
+
+                // // Show the mouse cursor
+                $('html').css('cursor', 'auto');
+            }
+        }
+    });
+
+    newInterface.properties = options.properties;
+
+    return newInterface;
+
+}
+    </script>
+
+</body>
+</html>

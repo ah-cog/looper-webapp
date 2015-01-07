@@ -464,6 +464,12 @@ function setupGestures (device) {
                 device.processing.setupBehaviorPalette ();
                 console.log (device.processing.behaviorPalette);
 
+                // Zoom into behavior palette
+                device.processing.stackedZoomedCanvasMouseX = device.processing.xOffset;
+                device.processing.stackedZoomedCanvasMouseY = device.processing.yOffset;
+                device.processing.stackedScaleFactor = device.processing.zoomFactor;
+                device.processing.panScale (device.processing.zoomedCanvasMouseX, -1 * device.processing.zoomedCanvasMouseY, 1.0);
+
                 // Center behavior palette on screen and zoom in on it
                 // looper.zoomIn ({ x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, factor: 2.0 });
             }
@@ -1225,6 +1231,45 @@ function BehaviorPalette (options) {
                 // Update the behavior's position if it's moving
                 if (behavior.state === 'MOVING') {
 
+                    currentMouseX = (behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX) - (behavior.interface.processing.screenWidth / 2);
+                    currentMouseY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
+
+                    // console.log ("MIXEE");
+                    // console.log (behavior.interface.processing.mouseX);
+                    // console.log (behavior.interface.processing.mouseY);
+
+                    behavior.interface.processing.zoomedCanvasMouseX = (currentMouseX - behavior.interface.processing.xOffset) / behavior.interface.processing.zoomFactor;
+                    behavior.interface.processing.zoomedCanvasMouseY = (currentMouseY - behavior.interface.processing.yOffset) / behavior.interface.processing.zoomFactor;
+
+                    // console.log ("Processing (mouseX, mouseY): " + processing.mouseX + ", " + processing.mouseY);
+
+                    // console.log (((looper.getCurrentPane() + 1) * $(window).width()) + processing.mouseX);
+                    // console.log (processing.mouseY);
+
+                    // // { x: ev.gesture.center.pageX, y: ev.gesture.center.pageY, t: (new Date()).getTime() }
+                    // processing.screenMouseX = event.gesture.center.pageX; // ((looper.getCurrentPane() + 1) * processing.screenWidth) + processing.mouseX;
+                    // processing.screenMouseY = event.gesture.center.pageY; // processing.mouseY;
+                    // console.log ("Screen (mouseX, mouseY), calculated: " + processing.screenMouseX + ", " + processing.screenMouseY);
+
+                    // processing.canvasMouseX = processing.screenMouseX - processing.xOffsetOrigin; // ((looper.getCurrentPane()) * processing.screenWidth) + processing.mouseX + (processing.xOffsetOrigin);
+                    // processing.canvasMouseY = processing.screenMouseY - processing.yOffsetOrigin; // processing.mouseY - (processing.yOffsetOrigin);
+                    // console.log ("Canvas (mouseX, mouseY), calculated: " + processing.canvasMouseX + ", " + processing.canvasMouseY);
+
+                    // // console.log ("zoomFactor: " + processing.zoomFactor);
+                    // processing.pannedCanvasMouseX = processing.canvasMouseX - processing.xOffset; // (1 + (1 - processing.zoomFactor)) * (((looper.getCurrentPane()) * processing.screenWidth) + (processing.mouseX + processing.xOffsetOrigin - processing.xOffset));
+                    // processing.pannedCanvasMouseY = processing.canvasMouseY - processing.yOffset; // (1 + (1 - processing.zoomFactor)) *  (processing.mouseY - (processing.yOffsetOrigin) - (processing.yOffset));
+                    // console.log ("Panned canvas (mouseX, mouseY), calculated (no zooming): " + processing.pannedCanvasMouseX + ", " + processing.pannedCanvasMouseY);
+
+                    // // Calculate canvas coordinates of panned and zoomed point
+                    // // var inverseZoom = (1 + (1 - processing.zoomFactor));
+                    // // console.log ("inverseZoom: " + inverseZoom);
+                    // processing.zoomedCanvasMouseX = (processing.canvasMouseX - processing.xOffset) / processing.zoomFactor; // * processing.zoomFactor; // (1 + (1 - processing.zoomFactor)) * (((looper.getCurrentPane()) * processing.screenWidth) + (processing.mouseX + processing.xOffsetOrigin - processing.xOffset));
+                    // processing.zoomedCanvasMouseY = (processing.canvasMouseY - processing.yOffset) / processing.zoomFactor; // * processing.zoomFactor; // (1 + (1 - processing.zoomFactor)) *  (processing.mouseY - (processing.yOffsetOrigin) - (processing.yOffset));
+
+
+
+
+                    // TODO: Update zoomedCanvasMouseX and zoomedCanvasMouseY
                     var mouseX = behavior.interface.processing.zoomedCanvasMouseX; // behavior.interface.processing.mouseX - (behavior.interface.processing.screenWidth / 2); // - behavior.interface.processing.xOffset;
                     var mouseY = behavior.interface.processing.zoomedCanvasMouseY; // behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2); // - behavior.interface.processing.yOffset;
                     var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop (mouseX, mouseY);
@@ -1291,6 +1336,9 @@ function BehaviorPalette (options) {
                         currentMouseX = (behavior.interface.processing.screenWidth * (behavior.interface.processing.deviceCount + 1) + behavior.interface.processing.mouseX) - (behavior.interface.processing.screenWidth / 2);
                         currentMouseY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
 
+                        behavior.interface.processing.zoomedCanvasMouseX = (currentMouseX - behavior.interface.processing.xOffset) / behavior.interface.processing.zoomFactor;
+                        behavior.interface.processing.zoomedCanvasMouseY = (currentMouseY - behavior.interface.processing.yOffset) / behavior.interface.processing.zoomFactor;
+
                         // console.log ("MIXEE");
                         // console.log (behavior.interface.processing.mouseX);
                         // console.log (behavior.interface.processing.mouseY);
@@ -1306,12 +1354,14 @@ function BehaviorPalette (options) {
                         // console.log ('behavior.interface.y:');
                         // console.log (behavior.interface.y);
 
-                        deltaX = currentMouseX - (behavior.interface.processing.screenWidth / 2);
-                        deltaY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
-                        angleInDegrees = Math.atan2(deltaY, deltaX);
+                        // deltaX = behavior.interface.x - 0; // deltaX = currentMouseX - (behavior.interface.processing.screenWidth / 2);
+                        // deltaY = behavior.interface.y - 0; // deltaY = behavior.interface.processing.mouseY - (behavior.interface.processing.screenHeight / 2);
+                        // console.log ('DELTAX = ' + deltaX);
+                        // console.log ('DELTAY = ' + deltaY);
+                        // angleInDegrees = Math.atan2(deltaY, deltaX);
 
-                        behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-                        behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+                        // behavior.interface.xTarget = behavior.interface.x + (400 / 2) * Math.cos(angleInDegrees);
+                        // behavior.interface.yTarget = behavior.interface.y + (400 / 2) * Math.sin(angleInDegrees);
 
                         // this.processing.behaviorPalette.updatePosition();
                         // this.processing.updatePosition(behavior);
@@ -1319,7 +1369,7 @@ function BehaviorPalette (options) {
                         // Check if under certain distance from the circle (and attach to)
                         // var newX = ((ev.gesture.center.pageX - device.processing.previousCenterX) / device.processing.scaleFactor) + device.processing.centerX;
                         // var newY = ((ev.gesture.center.pageY - device.processing.previousCenterY) / device.processing.scaleFactor) + device.processing.centerY;
-                        var distance = this.processing.lineDistance(this.x, this.y, this.xTarget, this.yTarget);
+                        var distance = this.processing.lineDistance (this.x, this.y, this.xTarget, this.yTarget);
 
                         // console.log("distance = ");
                         // console.log(distance);
@@ -1511,6 +1561,12 @@ function BehaviorPalette (options) {
                             // Destroy behavior palette!
                             // TODO: Make sure deleting the behavior palette doesn't ruin the structure/substructure tree.
                             behavior.interface.processing.behaviorPalette = null;
+
+                            // Return to previous perspective
+                            behavior.interface.processing.zoomedCanvasMouseX = behavior.interface.processing.stackedZoomedCanvasMouseX;
+                            behavior.interface.processing.zoomedCanvasMouseY = behavior.interface.processing.stackedZoomedCanvasMouseY;
+                            behavior.interface.processing.zoomFactor = behavior.interface.processing.stackedScaleFactor;
+                            behavior.interface.processing.panScale (behavior.interface.processing.zoomedCanvasMouseX, -1 * behavior.interface.processing.zoomedCanvasMouseY, behavior.interface.processing.zoomFactor);
                         }
 
                         if (behavior.interface.processing.behaviorPalette === null) {
@@ -1604,13 +1660,10 @@ function BehaviorPalette (options) {
 
                         if (distance < 110) {
 
-                            // Update position of the event node and set as "sequenced"
-                            //var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop(behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
-                            //var nearestPosition = behavior.interface.processing.getNearestPositionOnEventLoop(behavior.interface.processing.mouseX, behavior.interface.processing.mouseY);
-                            // behavior.interface.x = nearestPosition.x;
-                            // behavior.interface.y = nearestPosition.y;
-                            behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
-                            behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
+                            // TODO: Green
+                            // TODO: Update position of the event node and set as "sequenced"
+                            // behavior.interface.xTarget = behavior.interface.processing.screenWidth / 2 + (400 / 2) * Math.cos(angleInDegrees);
+                            // behavior.interface.yTarget = behavior.interface.processing.screenHeight / 2 + (400 / 2) * Math.sin(angleInDegrees);
                             behavior.interface.x = behavior.interface.xTarget;
                             behavior.interface.y = behavior.interface.yTarget;
                             behavior.state = 'SEQUENCED';
@@ -2406,18 +2459,64 @@ function LooperInstance (options) {
             processing.getAngle = getAngle;
 
             /**
+             * Pans the perspective to the specified (x,y) position on the canvas.
+             */
+            function panTo (x, y) {
+
+                // Store previous offset
+                processing.xOffset = -x;
+                processing.yOffset = y;
+            }
+            processing.panTo = panTo;
+
+            /**
+             * Pans the perspective by the specified increments along the x and y axes.
+             */
+            function panBy (x, y) {
+
+                // Store previous offset
+                processing.xOffset = processing.xOffset - x;
+                processing.yOffset = processing.yOffset + y;
+            }
+            processing.panBy = panBy;
+
+            function scaleTo (factor) {
+
+                processing.zoomFactor = factor;
+            }
+            processing.scaleTo = scaleTo;
+
+            function panScale (x, y, factor) {
+
+                console.log ('PANSCALE');
+
+                // Store previous offset
+                processing.xOffset = -x;
+                processing.yOffset = y;
+
+                processing.zoomFactor = factor;
+            }
+            processing.panScale = panScale;
+
+            /**
              * Returns the coordinates for the point on the loop nearest to the specified point.
              */
             processing.getNearestPositionOnEventLoop = function (x, y) {
                 // x = x + processing.screenWidth;
                 console.log ("Get nearest to: " + x + ", " + y);
 
-                var xPositionOfLoop = 0 + processing.xOffset;
-                var yPositionOfLoop = 0 + processing.yOffset;
+            //     device.processing.xOffset = currentMouseX - device.processing.mouse_x + device.processing.xOffsetPrevious;
+            // device.processing.yOffset = currentMouseY - device.processing.mouse_y + device.processing.yOffsetPrevious;
+
+                var xPositionOfLoop = 0; // - processing.xOffset;
+                var yPositionOfLoop = 0; // - processing.yOffset;
                 console.log ("LOOP(x,y) = " + xPositionOfLoop + ", " + yPositionOfLoop);
                 var deltaX = x - xPositionOfLoop; // x difference between specified point and center of loop
                 var deltaY = y - yPositionOfLoop; // y difference between specified point and center of loop
+                console.log ("deltaX: " + deltaX);
+                console.log ("deltaY: " + deltaY);
                 var angleInDegrees = Math.atan2 (deltaY, deltaX); // * 180 / PI;
+                console.log ("angleInDegrees: " + angleInDegrees);
 
                 // var nearestX = processing.screenWidth / 2 + (400 / 2) * Math.cos (angleInDegrees);
                 // var nearestY = processing.screenHeight / 2 + (400 / 2) * Math.sin (angleInDegrees);

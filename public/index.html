@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Looper</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="system.css">
+</head>
+<body data-app="webapp">
+<header>
+<h1>Looper</h1>
+<span class="status" id="status" role="status">Connecting…</span>
+<nav>
+<a href="http://localhost:3000">Canvas</a>
+<a href="http://localhost:3001">Messenger</a>
+<a href="http://localhost:3002">Mobile</a>
+</nav>
+</header>
+<main>
+<section class="panel">
+<h2>Clay loop</h2>
+<label for="unit">Unit</label>
+<select id="unit">
+</select>
+<svg id="scene" viewBox="0 0 400 300" role="img" aria-label="Current behavior loop">
+</svg>
+<p id="empty" class="muted">Add a behavior to build your first loop.</p>
+<ol id="sequence">
+</ol>
+</section>
+<section class="panel">
+<h2>Add behavior</h2>
+<p class="muted">Build a sequence shared with every connected app.</p>
+<form id="behavior-form">
+<label for="kind">Behavior</label>
+<select id="kind">
+<option>control</option>
+<option>time</option>
+<option>cause/effect</option>
+<option>message</option>
+<option>say</option>
+</select>
+<label for="content">Command</label>
+<input id="content" value="change color to green" maxlength="2000" required>
+<button>Add to loop</button>
+</form>
+<details>
+<summary>Connection settings</summary>
+<form id="connection-form">
+<label for="endpoint">Service URL (blank uses this host)</label>
+<input id="endpoint" type="text" placeholder="http://127.0.0.1:3001">
+<button>Connect</button>
+</form>
+</details>
+<p id="error" role="alert">
+</p>
+</section>
+<section class="panel full">
+<h2>Messages</h2>
+<form id="command-form">
+<input id="command" aria-label="Message" placeholder="Try: change color to blue" maxlength="2000" required>
+<button>Send</button>
+</form>
+<p class="muted">Commands update Local Clay immediately. Hardware is not required.</p>
+<ul id="timeline" aria-live="polite">
+</ul>
+</section>
+<script src="system.js" defer>
+</script>
+</main>
+</body>
+</html>

@@ -1,0 +1,45 @@
+*{box-sizing:border-box}
+body{margin:0;background:#f4f5f0;color:#20352e;font:16px system-ui,sans-serif}
+header,main{max-width:1120px;margin:auto;padding:24px}
+header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;border-bottom:1px solid #dce1d8}
+h1{font-size:24px;margin:0}
+a{color:#236c51}
+nav{display:flex;gap:16px;margin-left:auto}
+main{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+.panel{background:#fff;border:1px solid #dce1d8;border-radius:16px;padding:24px;min-width:0}
+h2{font-size:17px;margin:0 0 18px}
+.muted{color:#63726a;font-size:14px}
+.status{font-size:13px;color:#467157}
+label{display:block;font-size:14px;margin:12px 0 6px}
+input,select,button{font:inherit;border:1px solid #c7d4c9;border-radius:8px;padding:11px;background:white;color:inherit}
+input,select{width:100%}
+button{cursor:pointer;background:#225c46;color:white}
+button:disabled{opacity:.5;cursor:wait}
+button.secondary{background:#f4f5f0;color:#20352e}
+form{display:flex;gap:10px;margin-top:16px}
+form input{flex:1;min-width:0}
+#behavior-form{display:block}
+#behavior-form button{margin-top:14px;width:100%}
+#scene{width:100%;height:310px}
+#sequence{padding-left:24px}
+#sequence li{padding:10px 0;border-bottom:1px solid #edf0ea}
+#sequence button{float:right;font-size:12px;padding:5px}
+#timeline{list-style:none;padding:0;max-height:410px;overflow:auto}
+#timeline li{padding:12px 0;border-bottom:1px solid #edf0ea;overflow-wrap:anywhere}
+#timeline small{display:block;color:#63726a;font-size:12px;margin-top:5px}
+#error{color:#a33227;min-height:20px;overflow-wrap:anywhere}
+.full{grid-column:1/-1}
+details{margin-top:18px}
+summary{cursor:pointer}
+code{font-size:13px}
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+@media(max-width:700px){header,main{padding:16px}
+main{grid-template-columns:1fr}
+nav{margin-left:0;font-size:14px;width:100%}
+.panel{padding:18px}
+#scene{height:260px}
+h1{font-size:22px}
+}
+
+
+#connection-form{display:block}#connection-form button{margin-top:10px}

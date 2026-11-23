@@ -1,0 +1,47 @@
+name: looper
+services:
+  messenger:
+    build: ../looper-messenger
+    ports:
+      - "127.0.0.1:3001:3001"
+    environment:
+      DATABASE_PATH: /app/.data/looper.sqlite
+    volumes:
+      - looper-data:/app/.data
+    restart: unless-stopped
+  webapp:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MESSENGER_URL: http://messenger:3001
+    depends_on:
+      messenger:
+        condition: service_healthy
+    restart: unless-stopped
+  mobile:
+    build: ../looper-mobile
+    ports:
+      - "127.0.0.1:3002:3002"
+    environment:
+      MESSENGER_URL: http://messenger:3001
+    depends_on:
+      messenger:
+        condition: service_healthy
+    restart: unless-stopped
+  cli:
+    build: ../looper
+    profiles: [tools]
+    volumes:
+      - cli-data:/home/looper/.looper
+    command: ["--help"]
+  android-build:
+    build: ../looper-android
+    platform: linux/amd64
+    profiles: [build]
+    volumes:
+      - android-artifacts:/artifacts
+volumes:
+  looper-data:
+  cli-data:
+  android-artifacts:

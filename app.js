@@ -1,35 +1,20 @@
-
-/**
- * Module dependencies.
- */
-
-var express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path');
-
-var app = express();
-
-app.configure(function(){
-  app.set('port', process.env.PORT || 3000);
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));
+const express = require('express');
+const path = require('node:path');
+const app = express();
+const backend = process.env.MESSENGER_URL || 'http://127.0.0.1:3001';
+app.get('/health', (_req, res) => res.json({status: 'ok', service: 'looper-webapp'}));
+// Same-origin gateway keeps native builds and browsers on the same API contract.
+app.use('/api', async (req, res, next) => {
+  try {
+    const body = ['GET', 'HEAD'].includes(req.method) ? undefined : req;
+    const upstream = await fetch(backend + req.originalUrl, {
+      method: req.method, headers: {'content-type': req.get('content-type') || 'application/json'},
+      body, duplex: body ? 'half' : undefined, signal: AbortSignal.timeout(15000)
+    });
+    res.status(upstream.status).type(upstream.headers.get('content-type') || 'application/json');
+    res.send(Buffer.from(await upstream.arrayBuffer()));
+  } catch (error) { res.status(502).json({error: 'Messenger unavailable', detail: error.message}); }
 });
-
-app.configure('development', function(){
-  app.use(express.errorHandler());
-});
-
-app.get('/', routes.index);
-app.get('/users', user.list);
-
-http.createServer(app).listen(app.get('port'), function(){
-  console.log("Looking for Pixels on port " + app.get('port') + ".");
-});
+app.use(express.static(path.join(__dirname, 'public')));
+if (require.main === module) app.listen(process.env.PORT || 3000, '0.0.0.0', () => console.log('looper-webapp: http://localhost:' + (process.env.PORT || 3000)));
+module.exports = app;
